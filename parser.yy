@@ -43,7 +43,7 @@ addsub:
 muldiv:
     : posneg
     | stmt OP_MULT stmt { $$ = Node::add<ast::OpMult>($1, $3); }
-    | stmt OP_DIVF stmt { $$ = Node::add<ast::OpMult>($1, $3); }
+    | stmt OP_DIVF stmt { $$ = Node::add<ast::OpDiv>($1, $3); }
     ;
 
 posneg:
