@@ -23,7 +23,7 @@ public:
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
 
-    static int colno;
+    static int colno; 
 
     auto get_id() const { return m_id; }
 

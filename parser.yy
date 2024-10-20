@@ -14,45 +14,44 @@ extern int yylineno;
 
 %token    REJECTED
 
+%token    OP_PLUS
+%token    OP_MINUS
+%token    OP_MULT
+%token    OP_DIVF
 %token    OP_LPAREN
 %token    OP_RPAREN
 
-%token    OP_PLUS
-%token    OP_MINUS
-%token    OP_DIVF
-%token    OP_MULT
-
 %token    L_INTEGER
 
-%left     OP_PLUS OP_MINUS
-%left     OP_MULT OP_DIVF
+%left   OP_PLUS OP_MINUS
+%left   OP_MULT OP_DIVF
+
 
 %%
-
-stmt: 
-    : OP_LPAREN stmt OP_RPAREN { $$ = $2}
+stmt:
+    OP_LPAREN stmt OP_RPAREN { $$ = $2; }
     | addsub
     ;
 
 addsub:
-    : muldiv
-    | stmt OP_PLUS stmt   { $$ = Node::add<ast::OpAdd>($1, $3); }
-    | stmt OP_MINUS stmt   { $$ = Node::add<ast::OpSub>($1, $3); }
+    muldiv
+    | stmt OP_PLUS stmt { $$ = Node::add<ast::OpAdd>($1, $3); }
+    | stmt OP_MINUS stmt { $$ = Node::add<ast::OpSub>($1, $3); }
     ;
 
 muldiv:
-    : posneg
+    posneg
     | stmt OP_MULT stmt { $$ = Node::add<ast::OpMult>($1, $3); }
-    | stmt OP_DIVF stmt { $$ = Node::add<ast::OpDiv>($1, $3); }
+    | stmt OP_DIVF stmt { $$ = Node::add<ast::OpDivF>($1, $3); }
     ;
 
 posneg:
-    : L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
+    L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
     | OP_PLUS stmt { $$ = Node::add<ast::SignedNode>(OP_PLUS, $2); }
     | OP_MINUS stmt { $$ = Node::add<ast::SignedNode>(OP_MINUS, $2); }
     ;
-
 %%
+
 
 int yyerror(const char *s) {
     if (curtoken) {
@@ -67,3 +66,4 @@ int yyerror(const char *s) {
     Node::reset_root();
     return 1;
 }
+

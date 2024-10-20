@@ -2,12 +2,14 @@
 #define KIRAZ_AST_OPERATOR_H
 
 #include <cassert>
-
+#include <string>
+#include <fmt/core.h> // Make sure to include fmt if you're using it
 #include <kiraz/Node.h>
 
 namespace ast {
+class OpBinary : public Node{
 protected:
-    explicit OpBinary(int op, Node:: ptr &left, const Node::Ptr &right) 
+    explicit OpBinary(int op, const Node::Ptr &left, const Node::Ptr &right) 
     : Node(op), m_left(left), m_right(right) {
         assert(left);
         assert(right);
@@ -34,7 +36,7 @@ public:
 
 private:
     Node::Ptr m_left, m_right;
-}
+};
 
 class OpAdd : public OpBinary {
 public:
@@ -55,5 +57,7 @@ class OpDivF : public OpBinary {
 public:
     OpDivF(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_DIVF, left, right) {}
 };
-
+}
 #endif // KIRAZ_AST_OPERATOR_H
+
+
