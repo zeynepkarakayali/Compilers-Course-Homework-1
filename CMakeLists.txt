@@ -105,7 +105,11 @@ add_library(kiraz STATIC
     kiraz/token/Literal.cpp
     kiraz/token/Operator.h
     kiraz/token/Operator.cpp
-
+    kiraz/token/Keyword.h
+    kiraz/token/Keyword.cpp
+    kiraz/token/Identifier.h
+    kiraz/token/Identifier.cpp
+    
     kiraz/Node.h
     kiraz/Node.cpp
 
@@ -114,6 +118,9 @@ add_library(kiraz STATIC
 
     kiraz/ast/Literal.h
     kiraz/ast/Literal.cpp
+    
+    kiraz/ast/Keyword.h
+    kiraz/ast/Keyword.cpp
 
     ${BISON_PARSER_OUTPUTS}
     ${FLEX_LEXER_OUTPUTS}

@@ -27,6 +27,10 @@ static int test(std::string_view str) {
                                                 //yy_scan_string çağrıldığında, bu dize için bir giriş tamponu (buffer) oluşturur ve bu tamponu lexer için hazırlar.
     auto ret = yyparse(); // Bison yy_lex fonksiyonunu çağırır. Lexer, dizedeki karakterleri okur ve tanımlı kurallara göre token'lara dönüştürür. Daha sonrasında lexer’dan alınan token'ları kullanarak verinin yapılandırılmış biçimde doğru olup olmadığını kontrol eder.
                         // Durum kodu gönderir.
+
+                        // Generated parser will call yylex() when it wants to read a token
+                        //  Can use a flex-generated lexer to provide yylex(), or could hand-code
+                        // Flex creates the function yylex() from a .l file
     yy_delete_buffer(buffer);
 
     if (Node::current_root()) {

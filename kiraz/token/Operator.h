@@ -11,7 +11,7 @@ public:
 
 class OpPlus : public Operator {
 public:
-    OpPlus() : Operator(OP_PLUS) {}
+    OpPlus() : Operator(OP_PLUS) {} // OP_PLUS type'ı ile Token oluşturulup m_id set ediliyor.
     std::string as_string() const override { return "OP_PLUS"; }
 };
 
