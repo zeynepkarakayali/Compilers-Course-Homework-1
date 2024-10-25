@@ -22,6 +22,25 @@ public:
     KwFunc() : Keyword(KW_FUNC) {} 
     std::string as_string() const override { return "KW_FUNC"; }
 };
+
+class KwIf : public Keyword {
+public:
+    KwIf() : Keyword(KW_IF) {} 
+    std::string as_string() const override { return "KW_IF"; }
+};
+
+class KwWhile : public Keyword {
+public:
+    KwWhile() : Keyword(KW_WHILE) {} 
+    std::string as_string() const override { return "KW_WHILE"; }
+};
+
+
+class KwClass : public Keyword {
+public:
+    KwClass() : Keyword(KW_CLASS) {} 
+    std::string as_string() const override { return "KW_CLASS"; }
+};
 */
 
 }

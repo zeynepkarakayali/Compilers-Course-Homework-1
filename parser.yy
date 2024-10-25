@@ -6,9 +6,11 @@
 #include <kiraz/ast/Literal.h>
 #include <kiraz/ast/Keyword.h>
 #include <kiraz/ast/Identifier.h>
+#include <kiraz/ast/String.h>
 
 
 #include <kiraz/token/Literal.h>
+#include <kiraz/token/String.h>
 
 int yyerror(const char *msg);
 extern std::shared_ptr<Token> curtoken;
@@ -25,6 +27,7 @@ extern int yylineno;
 %token    OP_RPAREN
 
 %token    L_INTEGER
+%token    L_STRING
 
 %token    KW_IMPORT
 
@@ -37,15 +40,17 @@ extern int yylineno;
 %%
 
 stmt:
-    KW_IMPORT {$$ = Node::add<ast::KwImport>(KW_IMPORT);}
-    | IDENTIFIER {$$ = Node::add<ast::Identifier>(IDENTIFIER, curtoken);}
-    | paren
-    ;
-
-paren:
     OP_LPAREN stmt OP_RPAREN { $$ = $2; }
+    | KW_IMPORT { $$ = Node::add<ast::KwImport>(KW_IMPORT); }
+    | IDENTIFIER { $$ = Node::add<ast::Identifier>(IDENTIFIER, curtoken); }
     | addsub
-    ;
+;
+
+literal:
+    L_INTEGER
+    | L_STRING { $$ = Node::add<ast::StringLiteral>(curtoken); }
+;
+
 
 addsub:
     muldiv

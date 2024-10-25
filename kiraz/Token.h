@@ -4,6 +4,7 @@
 #include "main.h"
 
 #include <fmt/format.h>
+#include <string>
 
 class Token {
 public:
@@ -11,7 +12,7 @@ public:
     using Cptr = std::shared_ptr<const Token>;
 
     Token(int id) : m_id(id) {}
-    virtual ~Token();
+    virtual ~Token(); // Remove `= default`
 
     static auto New() {}
 
@@ -29,15 +30,6 @@ public:
 
 private:
     int m_id;
-};
-
-class Rejected : public Token {
-public:
-    Rejected(const char *text) : Token(REJECTED), m_text(text) {}
-    std::string as_string() const override { return fmt::format("REJECTED({})", m_text); }
-
-private:
-    std::string m_text;
 };
 
 #endif // KIRAZ_TOKEN_H

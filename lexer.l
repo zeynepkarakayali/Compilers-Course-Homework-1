@@ -9,6 +9,7 @@
 #include <kiraz/token/Operator.h>
 #include <kiraz/token/Keyword.h>
 #include <kiraz/token/Identifier.h>
+#include <kiraz/token/String.h>
 
 
 static auto &colno = Token::colno; // Since it's declared as static, it belongs to the class itself, not to any particular instance of the class. 
@@ -23,9 +24,7 @@ extern std::shared_ptr<Token> curtoken;
 
 %%
 
-[0-9]+ {colno += yyleng; curtoken = Token::New<Integer> (10, yytext); return L_INTEGER; }
-
-[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
+"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
 
 "+" {colno += yyleng; curtoken = Token::New<OpPlus> (); return OP_PLUS; }
 "-" {colno += yyleng; curtoken = Token::New<OpMinus> (); return OP_MINUS; }
@@ -34,9 +33,11 @@ extern std::shared_ptr<Token> curtoken;
 "(" {colno += yyleng; curtoken = Token::New<OpLparen> (); return OP_LPAREN; }
 ")" {colno += yyleng; curtoken = Token::New<OpRparen> (); return OP_RPAREN; }
 
+[0-9]+ {colno += yyleng; curtoken = Token::New<Integer> (10, yytext); return L_INTEGER; }
+\"([^\"\\]|\\.)*\"  { colno += yyleng; curtoken = Token::New<StringLiteral>(std::string_view(yytext, yyleng)); return L_STRING; }
+
+[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
+
 [ \n\t]+ {colno+= yyleng;}
-
-
-"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
 
 .    {colno += yyleng; curtoken = Token::New<Rejected> ("Rejected"); return YYUNDEF; }
