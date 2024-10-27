@@ -23,6 +23,7 @@ extern std::shared_ptr<Token> curtoken;
 
 %%
 
+"let" {colno += yyleng; curtoken = Token::New<KwLet> (); return KW_LET; }
 [0-9]+ {colno += yyleng; curtoken = Token::New<Integer> (10, yytext); return L_INTEGER; }
 
 [a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }

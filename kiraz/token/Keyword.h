@@ -16,6 +16,12 @@ public:
     std::string as_string() const override { return "KW_IMPORT"; }
 };
 
+class KwLet : public Keyword {
+public:
+    KwLet() : Keyword(KW_LET) {} 
+    std::string as_string() const override { return "KW_LET"; }
+};
+
 /*
 class KwFunc : public Keyword {
 public:
