@@ -1,8 +1,9 @@
 
 #include <cassert>
 #include <cstdio>
+#include <string_view>
 
-#include "lexer.h"
+#include "lexer.hpp"
 #include "main.h"
 #include "parser.hpp"
 
@@ -30,7 +31,7 @@ static int test(std::string_view str) {
     yy_delete_buffer(buffer);
 
     if (Node::current_root()) {
-        fmt::print("'{}' => {} ret: {}\n", str, Node::current_root()->as_string(), ret);
+        fmt::print("{}\n", Node::current_root()->as_string());
     }
 
     return ret;
@@ -97,7 +98,7 @@ int main(int argc, char **argv) {
        //if-with-initializer, semicolon in if statement: It allows you to both declare a variable and check a condition in a more concise way.
        //auto: the type of the variable that is being declared will be automatically deducted from its initializer
         case MODE_FILE:
-            if (auto ret = handle_mode_file(argv[i])    ; ret != OK) { 
+            if (auto ret = handle_mode_file(argv[i]); ret != OK) { 
                 return ret;
             }
             return 1;
@@ -110,6 +111,10 @@ int main(int argc, char **argv) {
         }
 
         mode = MODE_UNKNOWN;
+    }
+
+    if (mode != MODE_UNKNOWN) {
+        return usage(argc, argv);
     }
 
     return 0;

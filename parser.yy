@@ -1,6 +1,10 @@
 %{
+<<<<<<< HEAD
 #include "main.h"
 #include "lexer.h"
+=======
+#include "lexer.hpp"
+>>>>>>> original-repo/master
 
 #include <kiraz/ast/Operator.h>
 #include <kiraz/ast/Literal.h>
@@ -14,6 +18,7 @@ extern int yylineno;
 
 %token    REJECTED
 
+<<<<<<< HEAD
 %token    OP_PLUS
 %token    OP_MINUS
 %token    OP_MULT
@@ -53,6 +58,18 @@ posneg:
 %%
 
 
+=======
+/* TODO */
+
+%%
+
+/* TODO */
+
+stmt: %empty
+
+%%
+
+>>>>>>> original-repo/master
 int yyerror(const char *s) {
     if (curtoken) {
         fmt::print("** Parser Error at {}:{} at token: {}\n",
@@ -66,4 +83,7 @@ int yyerror(const char *s) {
     Node::reset_root();
     return 1;
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> original-repo/master
