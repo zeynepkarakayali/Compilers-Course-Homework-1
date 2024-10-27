@@ -24,12 +24,23 @@ extern int yylineno;
 
 %token    L_INTEGER
 
+%token    KW_IMPORT
+
+%token    IDENTIFIER
+
 %left   OP_PLUS OP_MINUS
 %left   OP_MULT OP_DIVF
 
 
 %%
+
 stmt:
+    KW_IMPORT {$$ = Node::add<ast::KwImport>(KW_IMPORT);}
+    | IDENTIFIER {$$ = Node::add<ast::Identifier>(IDENTIFIER, curtoken);}
+    | paren
+    ;
+
+paren:
     OP_LPAREN stmt OP_RPAREN { $$ = $2; }
     | addsub
     ;

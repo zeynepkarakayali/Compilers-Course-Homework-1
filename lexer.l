@@ -19,6 +19,8 @@ extern std::shared_ptr<Token> curtoken;
 
 %%
 
+"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
+
 [0-9]+ {colno += yyleng; curtoken = Token::New<Integer> (10, yytext); return L_INTEGER; }
 
 "+" {colno += yyleng; curtoken = Token::New<OpPlus> (); return OP_PLUS; }
