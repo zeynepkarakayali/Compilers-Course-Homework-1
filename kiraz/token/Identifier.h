@@ -2,6 +2,7 @@
 #define KIRAZ_TOKEN_IDENTIFIER_H
 
 #include <kiraz/Token.h>
+#include <string_view>
 
 namespace token {
 

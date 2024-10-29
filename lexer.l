@@ -7,6 +7,8 @@
 #include "main.h"
 #include <kiraz/token/Literal.h>
 #include <kiraz/token/Operator.h>
+#include <kiraz/token/Keyword.h>
+#include <kiraz/token/Identifier.h>
 static auto &colno = Token::colno; // Since it's declared as static, it belongs to the class itself, not to any particular instance of the class. 
                                     // Therefore, Token::colno is shared across all instances of the Token class.
                                     // Reference initialization: Binds a reference to an object.
@@ -29,6 +31,11 @@ extern std::shared_ptr<Token> curtoken;
 "/" {colno += yyleng; curtoken = Token::New<OpDivF> (); return OP_DIVF; }
 "(" {colno += yyleng; curtoken = Token::New<OpLparen> (); return OP_LPAREN; }
 ")" {colno += yyleng; curtoken = Token::New<OpRparen> (); return OP_RPAREN; }
+"<" {colno += yyleng; curtoken = Token::New<OpSmaller> (); return OP_SMALLER; }
+">" {colno += yyleng; curtoken = Token::New<OpBigger> (); return OP_BIGGER; }
+"==" {colno += yyleng; curtoken = Token::New<OpEquals> (); return OP_EQUALS; }
+"=" {colno += yyleng; curtoken = Token::New<OpAssign> (); return OP_ASSIGN; }
+
 
 [ \n\t]+ {colno+= yyleng;}
 .    {colno += yyleng; curtoken = Token::New<Rejected> ("Rejected"); return YYUNDEF; }

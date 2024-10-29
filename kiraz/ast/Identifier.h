@@ -1,7 +1,9 @@
 #ifndef KIRAZ_AST_IDENTIFIER_H
 #define KIRAZ_AST_IDENTIFIER_H
 #include <kiraz/Node.h>
-
+#include <memory>
+#include <string>
+#include <fmt/format.h>
 
 namespace ast {
 class Identifier : public Node {

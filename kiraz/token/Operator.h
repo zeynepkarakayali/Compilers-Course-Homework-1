@@ -44,6 +44,30 @@ public:
     OpRparen() : Operator(OP_RPAREN) {}
     std::string as_string() const override { return "OP_RPAREN"; }
 };
+
+class OpSmaller : public Operator {
+public:
+    OpSmaller() : Operator(OP_SMALLER) {}
+    std::string as_string() const override { return "OP_SMALLER"; }
+};
+
+class OpBigger : public Operator {
+public:
+    OpBigger() : Operator(OP_BIGGER) {}
+    std::string as_string() const override { return "OP_BIGGER"; }
+};
+
+class OpEquals : public Operator {
+public:
+    OpEquals() : Operator(OP_EQUALS) {}
+    std::string as_string() const override { return "OP_EQUALS"; }
+};
+
+class OpAssign : public Operator {
+public:
+    OpAssign() : Operator(OP_ASSIGN) {}
+    std::string as_string() const override { return "OP_ASSIGN"; }
+};
 }
 
 
