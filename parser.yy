@@ -20,19 +20,27 @@ extern int yylineno;
 
 %token    REJECTED
 
+%token    KW_LET
+%token    KW_IF
+%token    KW_ELSE
+%token    KW_WHILE
+
+%token    OP_ASSIGN
+%token    OP_SCOLON
+
 %token    OP_PLUS
 %token    OP_MINUS
 %token    OP_MULT
 %token    OP_DIVF
 %token    OP_LPAREN
 %token    OP_RPAREN
+%token    OP_LBRACE
+%token    OP_RBRACE
 %token    OP_SMALLER
 %token    OP_BIGGER
 %token    OP_EQUALS
-%token    OP_ASSIGN
 
 %token    L_INTEGER
-
 %token    IDENTIFIER
 
 %left OP_EQUALS
@@ -40,13 +48,21 @@ extern int yylineno;
 %left OP_PLUS OP_MINUS
 %left OP_MULT OP_DIVF
 
+%right OP_ASSIGN
+
+%start program
+
 %%
 
-program: expressions ;
+program: statements;
 
-expressions : expressions expression
-            | expression
+statements: statements statement
+            | statement
             ;
+
+statement: let_stmt ;
+
+let_stmt: KW_LET IDENTIFIER OP_ASSIGN expression OP_SCOLON;
 
 expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }

@@ -45,6 +45,19 @@ public:
     std::string as_string() const override { return "OP_RPAREN"; }
 };
 
+// NEWLY ADDED OPERATORS
+class OpLbrace : public Operator {
+public:
+    OpLbrace() : Operator(OP_LBRACE) {}
+    std::string as_string() const override { return "OP_LBRACE"; }
+};
+
+class OpRbrace : public Operator {
+public:
+    OpRbrace() : Operator(OP_RBRACE) {}
+    std::string as_string() const override { return "OP_RBRACE"; }
+};
+
 class OpSmaller : public Operator {
 public:
     OpSmaller() : Operator(OP_SMALLER) {}
@@ -67,6 +80,12 @@ class OpAssign : public Operator {
 public:
     OpAssign() : Operator(OP_ASSIGN) {}
     std::string as_string() const override { return "OP_ASSIGN"; }
+};
+
+class OpScolon : public Operator {
+public:
+    OpScolon() : Operator(OP_SCOLON) {}
+    std::string as_string() const override { return "OP_SCOLON"; }
 };
 }
 

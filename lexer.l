@@ -21,7 +21,14 @@ extern std::shared_ptr<Token> curtoken;
 
 %%
 
-[0-9]+ {colno += yyleng; curtoken = Token::New<Integer> (10, yytext); return L_INTEGER; }
+"if" {colno += yyleng; curtoken = Token::New<KwIf> (); return KW_IF;}
+"else" {colno += yyleng; curtoken = Token::New<KwElse> (); return KW_ELSE;}
+"while" {colno += yyleng; curtoken = Token::New<KwWhile> (); return KW_WHILE;}
+"let" {colno += yyleng; curtoken = Token::New<KwLet> (); return KW_LET;}
+
+[0-9]+ { printf("Integer token: %s\n", yytext); colno += yyleng; curtoken = Token::New<Integer> (10, yytext); return L_INTEGER; }
+
+[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
 
 "+" {colno += yyleng; curtoken = Token::New<OpPlus> (); return OP_PLUS; }
 "-" {colno += yyleng; curtoken = Token::New<OpMinus> (); return OP_MINUS; }
@@ -29,10 +36,13 @@ extern std::shared_ptr<Token> curtoken;
 "/" {colno += yyleng; curtoken = Token::New<OpDivF> (); return OP_DIVF; }
 "(" {colno += yyleng; curtoken = Token::New<OpLparen> (); return OP_LPAREN; }
 ")" {colno += yyleng; curtoken = Token::New<OpRparen> (); return OP_RPAREN; }
+"{" {colno += yyleng; curtoken = Token::New<OpLbrace> (); return OP_LBRACE; }
+"}" {colno += yyleng; curtoken = Token::New<OpRbrace> (); return OP_RBRACE; }
 "<" {colno += yyleng; curtoken = Token::New<OpSmaller> (); return OP_SMALLER; }
 ">" {colno += yyleng; curtoken = Token::New<OpBigger> (); return OP_BIGGER; }
 "==" {colno += yyleng; curtoken = Token::New<OpEquals> (); return OP_EQUALS; }
 "=" {colno += yyleng; curtoken = Token::New<OpAssign> (); return OP_ASSIGN; }
+";" {colno += yyleng; curtoken = Token::New<OpScolon> (); return OP_SCOLON; }
 
 
 [ \n\t]+ {colno+= yyleng;}
