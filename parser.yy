@@ -1,6 +1,5 @@
 %{
 #include "main.h"
-#include "lexer.h"
 #include "lexer.hpp"
 
 #include <kiraz/ast/Operator.h>
