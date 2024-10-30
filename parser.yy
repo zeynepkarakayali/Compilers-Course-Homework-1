@@ -33,70 +33,34 @@ extern int yylineno;
 
 %token    L_INTEGER
 
-%token    KW_IMPORT  
-
 %token    IDENTIFIER
 
 %left OP_EQUALS
 %left OP_SMALLER OP_BIGGER
 %left OP_PLUS OP_MINUS
 %left OP_MULT OP_DIVF
-%left OP_LPAREN OP_RPAREN
 
 %%
 
-program: imports statement_list
-       | statement_list
-       ;
+program: expressions ;
 
-imports:  import 
-        | imports import
-        ;
+expressions : expressions expression
+            | expression
+            ;
 
-import: KW_IMPORT IDENTIFIER ";"
-        ;
-
-statement_list: statement
-              | statement_list statement
-              ;
-
-statement: expression_stmt
-         | assignment_stmt
-         ;
-
-assignment_stmt: IDENTIFIER OP_ASSIGN expression ";" 
-               { $$ = Node::add<ast::OpAssign>(Node::add<ast::Identifier>($1), $3); }
-               ;
-
-expression_stmt: expression ";"
-               ;
-
-expression: comparison
-          | arith_expression
-          ;
-
-comparison: arith_expression OP_EQUALS arith_expression { $$ = Node::add<ast::OpEquals>($1, $3); }
-          | arith_expression OP_SMALLER arith_expression { $$ = Node::add<ast::OpSmaller>($1, $3); }
-          | arith_expression OP_BIGGER arith_expression { $$ = Node::add<ast::OpBigger>($1, $3); }
-          ;
-
-arith_expression: arith_expression OP_PLUS term { $$ = Node::add<ast::OpAdd>($1, $3); }
-                | arith_expression OP_MINUS term { $$ = Node::add<ast::OpSub>($1, $3); }
-                | term
-                ;
-
-term: factor
-     | term OP_MULT factor { $$ = Node::add<ast::OpMult>($1, $3); }
-     | term OP_DIVF factor { $$ = Node::add<ast::OpDivF>($1, $3); }
-     ;
-
-factor: L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
-      | IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); }
-      | OP_LPAREN expression OP_RPAREN { $$ = $2; }
-      ;
+expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
+            | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
+            | expression OP_MULT expression { $$ = Node::add<ast::OpMult>($1, $3); }
+            | expression OP_DIVF expression { $$ = Node::add<ast::OpDivF>($1, $3); }
+            | expression OP_EQUALS expression { $$ = Node::add<ast::OpEquals>($1, $3); }
+            | expression OP_SMALLER expression { $$ = Node::add<ast::OpSmaller>($1, $3); }
+            | expression OP_BIGGER expression { $$ = Node::add<ast::OpBigger>($1, $3); }
+            | OP_LPAREN expression OP_RPAREN { $$ = $2; }
+            | IDENTIFIER {$$ = Node::add<ast::Identifier>(IDENTIFIER, curtoken);}
+            | L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
+;
 
 %%
-
 
 int yyerror(const char *s) {
     if (curtoken) {
