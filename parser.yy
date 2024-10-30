@@ -60,9 +60,19 @@ statements: statements statement
             | statement
             ;
 
-statement: let_stmt ;
+statement: let_stmt | if_stmt | while_stmt ;
+
+if_stmt: if_body KW_ELSE stmt_tail
+        | if_body
+        ;
+
+if_body: KW_IF OP_LPAREN expression OP_RPAREN stmt_tail;
+
+while_stmt: KW_WHILE OP_LPAREN expression OP_RPAREN stmt_tail;
 
 let_stmt: KW_LET IDENTIFIER OP_ASSIGN expression OP_SCOLON;
+
+stmt_tail: OP_LBRACE statements OP_RBRACE;
 
 expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
