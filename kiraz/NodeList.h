@@ -31,7 +31,7 @@ public:
         return result;
     }
 
-    // Process all nodes in the queue
+    // Node'lari islemek icin
     void processNodes() {
         while (!nodeQueue.empty()) {
             auto node = nodeQueue.front();

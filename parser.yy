@@ -58,23 +58,28 @@ extern int yylineno;
 
 %%
 
-program: statements;
+program: statements { // Butun stmtlari iceren root Node'u
+                        Node::reset_root();
+                        Node::current_root() = $1;
+                    };
 
-statements:
-    statements statement OP_SCOLON {// Eger NodeList varsa yeni stmt ekle, yoksa yeni yarat
-                                    if (!$1) { $$ = Node::add<NodeList>(curtoken->get_id()); } 
-                                    else { $$ = $1; }
+statements: statements statement OP_SCOLON { // Eger NodeList varsa, stmt node'unu ekler, yoksa yaratir
+                                                if (!$1) {
+                                                    $$ = Node::add<NodeList>(curtoken->get_id());
+                                                } else {
+                                                    $$ = $1;
+                                                }
 
-                                    // stmt node'unu NodeListe ekle
-                                    std::static_pointer_cast<NodeList>($$)->addNode($2);
-                                    }
-    |          statement OP_SCOLON { // Create a new NodeList and add the single statement
+                                                // stmt'i NodeList'e ekler
+                                                std::static_pointer_cast<NodeList>($$)->addNode($2);
+                                            }
+            | statement OP_SCOLON { // Yeni bir NodeList olusturur ve stmt ekler
                                     $$ = Node::add<NodeList>(curtoken->get_id());
                                     std::static_pointer_cast<NodeList>($$)->addNode($1);
-                                   }
-;
+                                }
+            ;
 
-statement: let_stmt | if_stmt | while_stmt | expression { $$ = $1;} ; 
+statement: let_stmt | if_stmt | while_stmt | expression { $$ = $1; };
 
 if_stmt: if_body KW_ELSE stmt_tail
         | if_body
@@ -84,7 +89,7 @@ if_body: KW_IF OP_LPAREN expression OP_RPAREN stmt_tail;
 
 while_stmt: KW_WHILE OP_LPAREN expression OP_RPAREN stmt_tail;
 
-let_stmt: KW_LET IDENTIFIER OP_ASSIGN expression;
+let_stmt: KW_LET IDENTIFIER OP_ASSIGN expression ;
 
 stmt_tail: OP_LBRACE statements OP_RBRACE;
 
