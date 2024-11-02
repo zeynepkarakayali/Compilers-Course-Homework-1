@@ -6,21 +6,33 @@
 namespace ast {
 class KwImport : public Node{
     public:
-        KwImport(int type) : Node(KW_IMPORT) {}
+        KwImport() : Node() {}
         std::string as_string() const override {return fmt::format("KW_IMPORT"); }
 };
 
 
-/*
+
 class KwFunc : public Node{
     public:
-        KwFunc(int type) : Node(KW_FUNC) {}
-        std::string as_string() const override {return fmt::format("KW_FUNC"); }
-
-//HERE
+        KwFunc() : Node() {}
+        std::string as_string() const override {return fmt::format("Func"); }
 
 };
-*/
+
+
+class KwInt32 : public Node{
+    public:
+        KwInt32() : Node() {}
+        std::string as_string() const override {return fmt::format("int32"); }
+
+};
+
+class KwVoid : public Node{
+    public:
+        KwVoid() : Node() {}
+        std::string as_string() const override {return fmt::format("void"); }
+
+};
 
 }
 

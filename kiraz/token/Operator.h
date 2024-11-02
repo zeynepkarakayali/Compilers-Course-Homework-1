@@ -44,6 +44,37 @@ public:
     OpRparen() : Operator(OP_RPAREN) {}
     std::string as_string() const override { return "OP_RPAREN"; }
 };
+
+class OpScolon : public Operator {
+public:
+    OpScolon() : Operator(OP_SCOLON) {}
+    std::string as_string() const override { return "OP_SCOLON"; }
+};
+
+class OpColon : public Operator {
+public:
+    OpColon() : Operator(OP_COLON) {}
+    std::string as_string() const override { return "OP_COLON"; }
+};
+
+class OpRCBracket : public Operator {
+public:
+    OpRCBracket() : Operator(OP_RCBRACKET) {}
+    std::string as_string() const override { return "OP_RCBRACKET"; }
+};
+
+class OpLCBracket : public Operator {
+public:
+    OpLCBracket() : Operator(OP_LCBRACKET) {}
+    std::string as_string() const override { return "OP_LCBRACKET"; }
+};
+
+class OpComma : public Operator {
+public:
+    OpComma() : Operator(OP_COMMA) {}
+    std::string as_string() const override { return "OP_COMMA"; }
+};
+
 }
 
 

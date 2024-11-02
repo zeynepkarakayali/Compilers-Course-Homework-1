@@ -5,7 +5,7 @@
 
 namespace ast {
 
-Integer::Integer(Token::Ptr t) : Node(L_INTEGER){
+Integer::Integer(Token::Ptr t) : Node(){
 
     assert(t->get_id() == L_INTEGER);
     auto token_int = std::static_pointer_cast<const token::Integer>(t);
