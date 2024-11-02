@@ -14,6 +14,7 @@
 #include <kiraz/token/Identifier.h>
 
 #include <kiraz/Node.h>
+#include <kiraz/NodeList.h>
 
 int yyerror(const char *msg);
 extern std::shared_ptr<Token> curtoken;
@@ -60,23 +61,20 @@ extern int yylineno;
 program: statements;
 
 statements:
-    statements statement OP_SCOLON {
-        if (nodeQueue.empty()) {
-            nodeQueue.push(Node::add<NodeQueue>());
-        }
-        nodeQueue.push($2);
-        $$ = nodeQueue.pop();
-    }
-    | statement OP_SCOLON {
-        if (nodeQueue.empty()) {
-            nodeQueue.push(Node::add<NodeQueue>());
-        }
-        nodeQueue.push($1);
-        $$ = nodeQueue.pop();
-    }
-    ;
+    statements statement OP_SCOLON {// Eger NodeList varsa yeni stmt ekle, yoksa yeni yarat
+                                    if (!$1) { $$ = Node::add<NodeList>(curtoken->get_id()); } 
+                                    else { $$ = $1; }
 
-statement: let_stmt | if_stmt | while_stmt | expression { nodeQueue.push($1);} ; 
+                                    // stmt node'unu NodeListe ekle
+                                    std::static_pointer_cast<NodeList>($$)->addNode($2);
+                                    }
+    |          statement OP_SCOLON { // Create a new NodeList and add the single statement
+                                    $$ = Node::add<NodeList>(curtoken->get_id());
+                                    std::static_pointer_cast<NodeList>($$)->addNode($1);
+                                   }
+;
+
+statement: let_stmt | if_stmt | while_stmt | expression { $$ = $1;} ; 
 
 if_stmt: if_body KW_ELSE stmt_tail
         | if_body
@@ -99,14 +97,8 @@ expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3)
             | expression OP_BIGGER expression { $$ = Node::add<ast::OpBigger>($1, $3); }
             | OP_LPAREN expression OP_RPAREN { $$ = $2; }
             | IDENTIFIER {$$ = Node::add<ast::Identifier>(IDENTIFIER, curtoken);}
-            | posneg
+            | L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
 ;
-
-posneg:
-    L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
-    | OP_PLUS L_INTEGER { $$ = Node::add<ast::SignedNode>(OP_PLUS, $2); }
-    | OP_MINUS L_INTEGER { $$ = Node::add<ast::SignedNode>(OP_MINUS, $2); }
-    ;
 
 %%
 
