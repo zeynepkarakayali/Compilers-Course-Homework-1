@@ -9,6 +9,8 @@
 
 #include <kiraz/Node.h>
 
+NodeQueue nodeQueue;
+
 extern int yydebug;
 
 enum Status {
@@ -30,8 +32,14 @@ static int test(std::string_view str) {
                         // Durum kodu gönderir.
     yy_delete_buffer(buffer);
 
-    if (Node::current_root()) {
+    /*if (Node::current_root()) {
         fmt::print("{}\n", Node::current_root()->as_string());
+    }*/
+
+    while (!nodeQueue.empty()) {
+        Node::Ptr node = nodeQueue.pop();
+        // Process and print the node
+        fmt::print("{}\n", node->as_string());
     }
 
     return ret;
@@ -60,6 +68,8 @@ static int handle_mode_file(std::string_view arg) {
 
 int main(int argc, char **argv) {
     yydebug = 0;
+
+    nodeQueue.push(Node::add<NodeQueue>());
 
     static Mode mode = MODE_UNKNOWN;
 
