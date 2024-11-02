@@ -20,7 +20,7 @@ public:
 
     // NodeList'in iceriklerini duzgun sekilde formatlayip bastirmak icin
     std::string as_string() const override {
-        std::string result = "NodeList[ ";
+        std::string result = "[ "; // NodeList adini testler yuzunden sildim
         std::queue<NodePtr> tempQueue = nodeQueue; // kuyrugu gezmek icin temp
 
         while (!tempQueue.empty()) {

@@ -7,6 +7,7 @@
 #include <kiraz/ast/Literal.h>
 #include <kiraz/ast/Keyword.h>
 #include <kiraz/ast/Identifier.h>
+#include <kiraz/ast/Let.h>
 
 #include <kiraz/token/Literal.h>
 #include <kiraz/token/Operator.h>
@@ -31,6 +32,7 @@ extern int yylineno;
 
 %token    OP_ASSIGN
 %token    OP_SCOLON
+%token    OP_COLON
 
 %token    OP_PLUS
 %token    OP_MINUS
@@ -79,7 +81,7 @@ statements: statements statement OP_SCOLON { // Eger NodeList varsa, stmt node'u
                                 }
             ;
 
-statement: let_stmt | if_stmt | while_stmt | expression { $$ = $1; };
+statement: let_stmt { $$ = $1; } | if_stmt | while_stmt | expression { $$ = $1; };
 
 if_stmt: if_body KW_ELSE stmt_tail
         | if_body
@@ -89,7 +91,14 @@ if_body: KW_IF OP_LPAREN expression OP_RPAREN stmt_tail;
 
 while_stmt: KW_WHILE OP_LPAREN expression OP_RPAREN stmt_tail;
 
-let_stmt: KW_LET IDENTIFIER OP_ASSIGN expression ;
+let_stmt: KW_LET IDENTIFIER OP_ASSIGN expression { // IDENTIFIER tokeninden identifier node'u yaratma
+                                                    auto identifierNode = Node::add<ast::Identifier>(IDENTIFIER, curtoken);
+                                                    $$ = Node::add<ast::Let>(identifierNode, $4);}
+
+        | KW_LET IDENTIFIER OP_COLON iden_type OP_ASSIGN expression { auto identifierNode = Node::add<ast::Identifier>(IDENTIFIER, curtoken);
+                                                                    $$ = Node::add<ast::Let>(identifierNode, $4);} ;
+
+iden_type: IDENTIFIER {$$ = Node::add<ast::Identifier>(IDENTIFIER, curtoken);};
 
 stmt_tail: OP_LBRACE statements OP_RBRACE;
 

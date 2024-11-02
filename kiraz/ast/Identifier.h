@@ -6,9 +6,11 @@
 namespace ast {
 class Identifier : public Node {
     public:
-        Identifier(int type, Token::Ptr id) : Node(IDENTIFIER), m_id(id) {}
+        Identifier(int type, Token::Ptr id) : Node(type), m_id(id) {}
 
-        std::string as_string() const override {return fmt::format("Id({})", m_id->as_string());}
+        std::string as_string() const override {
+            return fmt::format("Id({})", m_id->as_string());
+        }
 
     private:
         Token::Ptr m_id;

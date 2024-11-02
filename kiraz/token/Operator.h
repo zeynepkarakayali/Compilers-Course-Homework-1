@@ -87,6 +87,12 @@ public:
     OpScolon() : Operator(OP_SCOLON) {}
     std::string as_string() const override { return "OP_SCOLON"; }
 };
+
+class OpColon : public Operator {
+public:
+    OpColon() : Operator(OP_COLON) {}
+    std::string as_string() const override { return "OP_COLON"; }
+};
 }
 
 

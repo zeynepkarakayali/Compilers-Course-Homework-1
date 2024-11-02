@@ -43,6 +43,7 @@ extern std::shared_ptr<Token> curtoken;
 "==" {colno += yyleng; curtoken = Token::New<OpEquals> (); return OP_EQUALS; }
 "=" {colno += yyleng; curtoken = Token::New<OpAssign> (); return OP_ASSIGN; }
 ";" {colno += yyleng; curtoken = Token::New<OpScolon> (); return OP_SCOLON; }
+":" {colno += yyleng; curtoken = Token::New<OpColon> (); return OP_COLON; }
 
 
 [ \n\t]+ {colno+= yyleng;}
