@@ -29,6 +29,10 @@ public:
             case OP_MINUS: opstr = "Sub"; break;
             case OP_MULT:  opstr = "Mult"; break;
             case OP_DIVF:  opstr = "DivF"; break;
+            case OP_SMALLER:  opstr = "Smaller"; break;
+            case OP_BIGGER:   opstr = "Bigger"; break;
+            case OP_EQUALS:   opstr = "Equals"; break;
+            case OP_ASSIGN:  opstr = "Assign"; break;
             default: break;
         }
         return fmt::format("{}({},{})", opstr, get_left()->as_string(), get_right()->as_string());
@@ -60,7 +64,25 @@ public:
     OpDivF(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_DIVF, left, right) {}
 };
 
+class OpSmaller : public OpBinary {
+public:
+    OpSmaller(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_SMALLER, left, right) {}
+};
 
+class OpBigger : public OpBinary {
+public:
+    OpBigger(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_BIGGER, left, right) {}
+};
+
+class OpEquals : public OpBinary {
+public:
+    OpEquals(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_EQUALS, left, right) {}
+};
+
+class OpAssign : public OpBinary {
+public:
+    OpAssign(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_ASSIGN, left, right) {}   
+};
 
 }
 #endif // KIRAZ_AST_OPERATOR_H

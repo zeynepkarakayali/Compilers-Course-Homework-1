@@ -18,7 +18,7 @@ public:
     Node::Ptr get_type() const { return type; }
 
     std::string as_string() const override {
-        return "FArg(n=" + name->as_string() + ", t=Id(" + type->as_string() + "))";
+        return "FArg(n=" + name->as_string() + ", t=" + type->as_string() + ")";
     }
 
 private:

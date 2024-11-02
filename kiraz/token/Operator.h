@@ -57,22 +57,45 @@ public:
     std::string as_string() const override { return "OP_COLON"; }
 };
 
-class OpRCBracket : public Operator {
+class OpLbrace : public Operator {
 public:
-    OpRCBracket() : Operator(OP_RCBRACKET) {}
-    std::string as_string() const override { return "OP_RCBRACKET"; }
+    OpLbrace() : Operator(OP_LBRACE) {}
+    std::string as_string() const override { return "OP_LBRACE"; }
 };
 
-class OpLCBracket : public Operator {
+class OpRbrace : public Operator {
 public:
-    OpLCBracket() : Operator(OP_LCBRACKET) {}
-    std::string as_string() const override { return "OP_LCBRACKET"; }
+    OpRbrace() : Operator(OP_RBRACE) {}
+    std::string as_string() const override { return "OP_RBRACE"; }
 };
 
 class OpComma : public Operator {
 public:
     OpComma() : Operator(OP_COMMA) {}
     std::string as_string() const override { return "OP_COMMA"; }
+};
+
+class OpSmaller : public Operator {
+public:
+    OpSmaller() : Operator(OP_SMALLER) {}
+    std::string as_string() const override { return "OP_SMALLER"; }
+};
+
+class OpBigger : public Operator {
+public:
+    OpBigger() : Operator(OP_BIGGER) {}
+    std::string as_string() const override { return "OP_BIGGER"; }
+};
+
+class OpEquals : public Operator {
+public:
+    OpEquals() : Operator(OP_EQUALS) {}
+    std::string as_string() const override { return "OP_EQUALS"; }
+};
+class OpAssign : public Operator {
+public:
+    OpAssign() : Operator(OP_ASSIGN) {}
+    std::string as_string() const override { return "OP_ASSIGN"; }
 };
 
 }

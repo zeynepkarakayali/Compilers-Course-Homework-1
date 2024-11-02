@@ -23,16 +23,28 @@ public:
     std::string as_string() const override { return "KW_FUNC"; }
 };
 
-class KwInt32 : public Keyword {
+class KwIf : public Keyword {
 public:
-    KwInt32() : Keyword(KW_INT32) {} 
-    std::string as_string() const override { return "KW_INT32"; }
+    KwIf() : Keyword(KW_IF) {} 
+    std::string as_string() const override { return "KW_IF"; }
 };
 
-class KwVoid : public Keyword {
+class KwElse : public Keyword {
 public:
-    KwVoid() : Keyword(KW_VOID) {} 
-    std::string as_string() const override { return "KW_VOID"; }
+    KwElse() : Keyword(KW_ELSE) {} 
+    std::string as_string() const override { return "KW_ELSE"; }
+};
+
+class KwWhile : public Keyword {
+public:
+    KwWhile() : Keyword(KW_WHILE) {} 
+    std::string as_string() const override { return "KW_WHILE"; }
+};
+
+class KwLet : public Keyword {
+public:
+    KwLet() : Keyword(KW_LET) {} 
+    std::string as_string() const override { return "KW_LET"; }
 };
 
 }

@@ -34,19 +34,26 @@ extern std::shared_ptr<Token> curtoken;
 
 ";" {colno += yyleng; curtoken = Token::New<OpScolon> (); return OP_SCOLON; } 
 ":" {colno += yyleng; curtoken = Token::New<OpColon> (); return OP_COLON; } 
-"{" {colno += yyleng; curtoken = Token::New<OpRCBracket> (); return OP_RCBRACKET; } 
-"}" {colno += yyleng; curtoken = Token::New<OpLCBracket> (); return OP_LCBRACKET; } 
+"{" {colno += yyleng; curtoken = Token::New<OpLbrace> (); return OP_LBRACE; } 
+"}" {colno += yyleng; curtoken = Token::New<OpRbrace> (); return OP_RBRACE; } 
 "," {colno += yyleng; curtoken = Token::New<OpComma> (); return OP_COMMA; } 
+"<" {colno += yyleng; curtoken = Token::New<OpSmaller> (); return OP_SMALLER; }
+">" {colno += yyleng; curtoken = Token::New<OpBigger> (); return OP_BIGGER; }
+"==" {colno += yyleng; curtoken = Token::New<OpEquals> (); return OP_EQUALS; }
+"=" {colno += yyleng; curtoken = Token::New<OpAssign> (); return OP_ASSIGN; }
 
 
 [ \n\t]+ {colno+= yyleng;}
 
 
-"import" {colno += yyleng; curtoken = Token::New<KwImport> ();     printf("Lexer: Token KW_IMPORT (%s) at line %d, column %d\n", yytext, yylineno, colno); return KW_IMPORT;}
-"int32" {colno += yyleng; curtoken = Token::New<KwInt32> ();     printf("Lexer: Token KWINT32 (%s) at line %d, column %d\n", yytext, yylineno, colno); return KW_INT32;} 
-"void" {colno += yyleng; curtoken = Token::New<KwVoid> (); return KW_VOID;}
-"func" {colno += yyleng; curtoken = Token::New<KwFunc> ();     printf("Lexer: Token KWFUNC (%s) at line %d, column %d\n", yytext, yylineno, colno); return KW_FUNC;}
-[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); printf("Lexer: Token IDENTIFIER (%s) at line %d, column %d\n", yytext, yylineno, colno);  return IDENTIFIER; }
+"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
+"func" {colno += yyleng; curtoken = Token::New<KwFunc> (); return KW_FUNC;}
+"if" {colno += yyleng; curtoken = Token::New<KwIf> (); return KW_IF;}
+"else" {colno += yyleng; curtoken = Token::New<KwElse> (); return KW_ELSE;}
+"while" {colno += yyleng; curtoken = Token::New<KwWhile> (); return KW_WHILE;}
+"let" {colno += yyleng; curtoken = Token::New<KwLet> (); return KW_LET;}
+
+[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
 
 
 .    {colno += yyleng; curtoken = Token::New<Rejected> ("Rejected"); return YYUNDEF; }

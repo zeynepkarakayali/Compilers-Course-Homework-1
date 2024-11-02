@@ -19,19 +19,28 @@ class KwFunc : public Node{
 
 };
 
-
-class KwInt32 : public Node{
+class KwIf : public Node{
     public:
-        KwInt32() : Node() {}
-        std::string as_string() const override {return fmt::format("int32"); }
-
+        KwIf() : Node() {}
+        std::string as_string() const override {return fmt::format("KW_IF"); }
 };
 
-class KwVoid : public Node{
+class KwElse : public Node{
     public:
-        KwVoid() : Node() {}
-        std::string as_string() const override {return fmt::format("void"); }
+        KwElse() : Node() {}
+        std::string as_string() const override {return fmt::format("KW_ELSE"); }
+};
 
+class KwWhile : public Node{
+    public:
+        KwWhile() : Node() {}
+        std::string as_string() const override {return fmt::format("KW_WHILE"); }
+};
+
+class KwLet : public Node{
+    public:
+        KwLet() : Node() {}
+        std::string as_string() const override {return fmt::format("KW_LET"); }
 };
 
 }

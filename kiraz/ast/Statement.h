@@ -18,7 +18,7 @@ class FuncStatement : public Node{
         }
     }
         std::string as_string() const override 
-        {return fmt::format("Func(n={}, a=FuncArgs([{}]), r=Id({}), s=[])", m_iden->as_string(), m_args->as_string(),  m_type->as_string()); }
+        {return fmt::format("Func(n={}, a=FuncArgs([{}]), r={}, s=[])", m_iden->as_string(), m_args->as_string(),  m_type->as_string()); }
 
     private:
        Node::Cptr m_iden;
