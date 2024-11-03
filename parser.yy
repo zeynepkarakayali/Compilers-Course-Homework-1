@@ -43,6 +43,7 @@ extern int yylineno;
 %token    KW_IF
 %token    KW_ELSE
 %token    KW_WHILE
+%token    KW_CLASS
 
 %token    IDENTIFIER
 
@@ -62,71 +63,84 @@ program: statements {
                         Node::current_root() = $1;
                     };
 
-statements: statements statement OP_SCOLON { 
+statements:   statements statement OP_SCOLON { 
                                                 if (!$1) {$$ = Node::add<NodeList>();} 
                                                 else {$$ = $1;}
-
                                                 std::static_pointer_cast<NodeList>($1)->addNode($2);
-                                            }
-            | statement OP_SCOLON { 
-                                    $$ = Node::add<NodeList>();
-                                    std::static_pointer_cast<NodeList>($$)->addNode($1);
-                                }
-            ;
+                                           }
+            |            statement OP_SCOLON { 
+                                                  $$ = Node::add<NodeList>();
+                                                  std::static_pointer_cast<NodeList>($$)->addNode($1);
+                                             }
+          ;
 
-statement: let_stmt | if_stmt | while_stmt | expression { $$ = $1; };
+statement:   let_stmt { $$ = $1; }  
+           | if_stmt { $$ = $1; }  
+           | while_stmt { $$ = $1; }  
+           | expression { $$ = $1; }  
+           | import-stmt { $$ = $1; }  
+           | fun-declaration { $$ = $1; }  
+           | class-declaration { $$ = $1; }  
+           ;
 
 
+import-stmt: KW_IMPORT iden { $$ = Node::add<ast::ImportStatement>($2); };
 
-fun-declaration: KW_FUNC iden arguments type-annot compound-stmt { $$ = Node::add<ast::FuncStatement>($2, $3, $4); }
-    ;
+class-declaration: KW_CLASS iden compound-stmt {$$ = Node::add<ast::ClassStatement>($2, $3); }
+                 ;
 
-type-annot: OP_COLON iden  {$$ = $2;}
-    ;
+fun-declaration: KW_FUNC iden arguments type-annot compound-stmt { $$ = Node::add<ast::FuncStatement>($2, $3, $4, $5); };
+
+type-annot: OP_COLON iden  {$$ = $2;};
 
 
-arguments: OP_LPAREN arg-list OP_RPAREN {$$=$2;}
-    | OP_LPAREN OP_RPAREN
-    ;
+arguments:   OP_LPAREN arg-list OP_RPAREN {$$=$2;}
+           | OP_LPAREN OP_RPAREN
+           ;
 
-arg-list: arg-list OP_COMMA arg {auto argList = std::dynamic_pointer_cast<ast::ArgList>($1); 
-                            auto argument = std::dynamic_pointer_cast<ast::Argument>($3); 
-                            if (argList && argument) {
-                                argList->add_argument(argument); 
-                                $$ = argList; 
-                            } else {
-                                yyerror("arg-list dynamic cast failed");
-                            }
-                        }
-    | arg { auto argList = Node::add<ast::ArgList>();
-            auto argument = std::dynamic_pointer_cast<ast::Argument>($1); 
-            if (argument) {
-                argList->add_argument(argument); 
-                $$ = argList;
-            } else {
-                yyerror("argument dynamic cast failed");
+arg-list:   arg-list OP_COMMA arg {     auto argList = std::dynamic_pointer_cast<ast::ArgList>($1); 
+                                        auto argument = std::dynamic_pointer_cast<ast::Argument>($3); 
+                                        if (argList && argument) {
+                                            argList->add_argument(argument); 
+                                            $$ = argList; 
+                                        } else { yyerror("arg-list dynamic cast failed"); }
+                                  }
+          | arg {   auto argList = Node::add<ast::ArgList>();
+                    auto argument = std::dynamic_pointer_cast<ast::Argument>($1); 
+                    if (argument) {
+                        argList->add_argument(argument); 
+                        $$ = argList;
+                    } else { yyerror("argument dynamic cast failed");}
                 }
-          }
-    ;
+        ;
 
 arg: iden type-annot  { $$ = Node::add<ast::Argument>($1, $2);}
-    ;
-
-compound-stmt: OP_LBRACE OP_RBRACE 
-    ;
+   ;
 
 
-if_stmt: if_body KW_ELSE stmt_tail
+
+
+if_stmt: if_body KW_ELSE compound-stmt
         | if_body
         ;
 
-if_body: KW_IF OP_LPAREN expression OP_RPAREN stmt_tail;
+if_body: KW_IF OP_LPAREN expression OP_RPAREN compound-stmt;
 
-while_stmt: KW_WHILE OP_LPAREN expression OP_RPAREN stmt_tail;
+while_stmt: KW_WHILE OP_LPAREN expression OP_RPAREN compound-stmt;
 
 let_stmt: KW_LET IDENTIFIER OP_ASSIGN expression ;
 
-stmt_tail: OP_LBRACE statements OP_RBRACE;
+
+compound-stmt:    OP_LBRACE statements OP_RBRACE { 
+                                                    auto compoundStmt = Node::add<ast::CompoundStatement>();
+                                                    auto stmtList = std::dynamic_pointer_cast<NodeList>($2);
+                                                    if (stmtList) {
+                                                        for (const auto& stmt : stmtList->get_nodes()) { compoundStmt->add_statement(stmt);}
+                                                    } else { yyerror("Failed to cast statements to NodeList in compound statement");}
+                                                    $$ = compoundStmt;
+                                                }
+                | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
+             ;
 
 expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }

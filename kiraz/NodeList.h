@@ -17,20 +17,20 @@ public:
         nodeQueue.push(node);
     }
 
-    // NodeList'in iceriklerini duzgun sekilde formatlayip bastirmak icin
     std::string as_string() const override {
-        std::string result = "[ "; // NodeList adini testler yuzunden sildim
-        std::queue<NodePtr> tempQueue = nodeQueue; // kuyrugu gezmek icin temp
+        std::string result= "";
+        if(getQueueSize()>1) {result+= "Module(["; }
+        std::queue<NodePtr> tempQueue = nodeQueue; 
 
         while (!tempQueue.empty()) {
-            result += tempQueue.front()->as_string() + "; "; //terimleri ayirmak icin ;
+            result += tempQueue.front()->as_string() + ", "; 
             tempQueue.pop();
         }
-        result += "]";
+        result.resize(result.size() - 2);
+        if(getQueueSize()>1) {result+= "])"; }
         return result;
     }
 
-    // Node'lari islemek icin
     void processNodes() {
         while (!nodeQueue.empty()) {
             auto node = nodeQueue.front();
@@ -42,6 +42,16 @@ public:
 
     size_t getQueueSize() const {
         return nodeQueue.size();
+    }
+
+    std::vector<NodePtr> get_nodes() const {
+        std::vector<NodePtr> nodes;
+        std::queue<NodePtr> tempQueue = nodeQueue;
+        while (!tempQueue.empty()) {
+            nodes.push_back(tempQueue.front());
+            tempQueue.pop();
+        }
+        return nodes;
     }
 
 private:

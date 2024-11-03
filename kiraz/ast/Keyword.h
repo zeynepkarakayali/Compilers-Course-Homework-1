@@ -11,7 +11,6 @@ class KwImport : public Node{
 };
 
 
-
 class KwFunc : public Node{
     public:
         KwFunc() : Node() {}
@@ -41,6 +40,12 @@ class KwLet : public Node{
     public:
         KwLet() : Node() {}
         std::string as_string() const override {return fmt::format("KW_LET"); }
+};
+
+class KwClass : public Node{
+    public:
+        KwClass() : Node() {}
+        std::string as_string() const override {return fmt::format("KW_CLASS"); }
 };
 
 }

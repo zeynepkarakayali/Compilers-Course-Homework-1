@@ -47,6 +47,12 @@ public:
     std::string as_string() const override { return "KW_LET"; }
 };
 
+class KwClass : public Keyword {
+public:
+    KwClass() : Keyword(KW_CLASS) {} 
+    std::string as_string() const override { return "KW_CLASS"; }
+};
+
 }
 
 
