@@ -8,7 +8,7 @@ namespace token {
 class Integer : public Token {
 public:
     Integer( int64_t base, std::string_view value) : Token(L_INTEGER), m_base(base), m_value(value) {} //constructor: A constructor in C++ is a special method that is automatically called when an object of a class is created.
-    // : Token(L_INTEGER), m_base(base), m_value(value) --> member initialization list.
+    // : Token(L_INTEGER) -> token'ın m_id sini L'INTEGER ile başlatır, m_base(base), m_value(value) --> member initialization list.
     virtual ~Integer();
 
     std::string as_string() const override {return fmt::format("Integer{}",m_value);}

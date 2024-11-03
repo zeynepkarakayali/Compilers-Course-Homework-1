@@ -4,30 +4,49 @@
 
 
 namespace ast {
+class KwImport : public Node{
+    public:
+        KwImport() : Node() {}
+        std::string as_string() const override {return fmt::format("KW_IMPORT"); }
+};
+
+
+class KwFunc : public Node{
+    public:
+        KwFunc() : Node() {}
+        std::string as_string() const override {return fmt::format("Func"); }
+
+};
+
 class KwIf : public Node{
     public:
-        KwIf(int type) : Node(KW_IF) {}
+        KwIf() : Node() {}
         std::string as_string() const override {return fmt::format("KW_IF"); }
 };
 
 class KwElse : public Node{
     public:
-        KwElse(int type) : Node(KW_ELSE) {}
+        KwElse() : Node() {}
         std::string as_string() const override {return fmt::format("KW_ELSE"); }
 };
 
 class KwWhile : public Node{
     public:
-        KwWhile(int type) : Node(KW_WHILE) {}
+        KwWhile() : Node() {}
         std::string as_string() const override {return fmt::format("KW_WHILE"); }
 };
 
 class KwLet : public Node{
     public:
-        KwLet(int type) : Node(KW_LET) {}
+        KwLet() : Node() {}
         std::string as_string() const override {return fmt::format("KW_LET"); }
 };
-}
 
+class KwClass : public Node{
+    public:
+        KwClass() : Node() {}
+        std::string as_string() const override {return fmt::format("KW_CLASS"); }
+};
+}
 
 #endif

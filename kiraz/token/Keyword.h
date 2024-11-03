@@ -10,6 +10,20 @@ public:
 };
 
 
+class KwImport : public Keyword {
+public:
+    KwImport() : Keyword(KW_IMPORT) {} 
+    std::string as_string() const override { return "KW_IMPORT"; }
+};
+
+
+class KwFunc : public Keyword {
+public:
+    KwFunc() : Keyword(KW_FUNC) {} 
+    std::string as_string() const override { return "KW_FUNC"; }
+};
+
+
 class KwIf : public Keyword {
 public:
     KwIf() : Keyword(KW_IF) {} 
@@ -34,6 +48,11 @@ public:
     std::string as_string() const override { return "KW_LET"; }
 };
 
+class KwClass : public Keyword {
+public:
+    KwClass() : Keyword(KW_CLASS) {} 
+    std::string as_string() const override { return "KW_CLASS"; }
+};
 }
 
 #endif

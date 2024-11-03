@@ -2,6 +2,7 @@
     "files.associations": {
         "vector": "cpp",
         "variant": "cpp",
+<<<<<<< HEAD
         "memory": "cpp",
         "cctype": "cpp",
         "clocale": "cpp",
@@ -9,12 +10,32 @@
         "csignal": "cpp",
         "cstdarg": "cpp",
         "cstddef": "cpp",
+=======
+        "any": "cpp",
+        "array": "cpp",
+        "atomic": "cpp",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "bitset": "cpp",
+        "cctype": "cpp",
+        "chrono": "cpp",
+        "clocale": "cpp",
+        "cmath": "cpp",
+        "codecvt": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "condition_variable": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "cstdint": "cpp",
+>>>>>>> origin/ceyda
         "cstdio": "cpp",
         "cstdlib": "cpp",
         "cstring": "cpp",
         "ctime": "cpp",
         "cwchar": "cpp",
         "cwctype": "cpp",
+<<<<<<< HEAD
         "algorithm": "cpp",
         "any": "cpp",
         "array": "cpp",
@@ -36,6 +57,8 @@
         "condition_variable": "cpp",
         "coroutine": "cpp",
         "cstdint": "cpp",
+=======
+>>>>>>> origin/ceyda
         "deque": "cpp",
         "forward_list": "cpp",
         "list": "cpp",
@@ -45,23 +68,38 @@
         "unordered_map": "cpp",
         "unordered_set": "cpp",
         "exception": "cpp",
+<<<<<<< HEAD
         "functional": "cpp",
         "iterator": "cpp",
         "memory_resource": "cpp",
         "netfwd": "cpp",
+=======
+        "algorithm": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+>>>>>>> origin/ceyda
         "numeric": "cpp",
         "optional": "cpp",
         "random": "cpp",
         "ratio": "cpp",
+<<<<<<< HEAD
         "source_location": "cpp",
+=======
+>>>>>>> origin/ceyda
         "string_view": "cpp",
         "system_error": "cpp",
         "tuple": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
+<<<<<<< HEAD
         "format": "cpp",
         "fstream": "cpp",
         "future": "cpp",
+=======
+        "fstream": "cpp",
+>>>>>>> origin/ceyda
         "initializer_list": "cpp",
         "iomanip": "cpp",
         "iosfwd": "cpp",
@@ -73,6 +111,7 @@
         "numbers": "cpp",
         "ostream": "cpp",
         "semaphore": "cpp",
+<<<<<<< HEAD
         "shared_mutex": "cpp",
         "span": "cpp",
         "sstream": "cpp",
@@ -84,5 +123,14 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp"
+=======
+        "sstream": "cpp",
+        "stdexcept": "cpp",
+        "stop_token": "cpp",
+        "streambuf": "cpp",
+        "thread": "cpp",
+        "cinttypes": "cpp",
+        "typeinfo": "cpp"
+>>>>>>> origin/ceyda
     }
 }

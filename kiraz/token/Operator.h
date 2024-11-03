@@ -11,7 +11,7 @@ public:
 
 class OpPlus : public Operator {
 public:
-    OpPlus() : Operator(OP_PLUS) {}
+    OpPlus() : Operator(OP_PLUS) {} // OP_PLUS type'ı ile Token oluşturulup m_id set ediliyor.
     std::string as_string() const override { return "OP_PLUS"; }
 };
 
@@ -45,7 +45,18 @@ public:
     std::string as_string() const override { return "OP_RPAREN"; }
 };
 
-// NEWLY ADDED OPERATORS
+class OpScolon : public Operator {
+public:
+    OpScolon() : Operator(OP_SCOLON) {}
+    std::string as_string() const override { return "OP_SCOLON"; }
+};
+
+class OpColon : public Operator {
+public:
+    OpColon() : Operator(OP_COLON) {}
+    std::string as_string() const override { return "OP_COLON"; }
+};
+
 class OpLbrace : public Operator {
 public:
     OpLbrace() : Operator(OP_LBRACE) {}
@@ -56,6 +67,12 @@ class OpRbrace : public Operator {
 public:
     OpRbrace() : Operator(OP_RBRACE) {}
     std::string as_string() const override { return "OP_RBRACE"; }
+};
+
+class OpComma : public Operator {
+public:
+    OpComma() : Operator(OP_COMMA) {}
+    std::string as_string() const override { return "OP_COMMA"; }
 };
 
 class OpSmaller : public Operator {
@@ -75,26 +92,23 @@ public:
     OpEquals() : Operator(OP_EQUALS) {}
     std::string as_string() const override { return "OP_EQUALS"; }
 };
-
 class OpAssign : public Operator {
 public:
     OpAssign() : Operator(OP_ASSIGN) {}
     std::string as_string() const override { return "OP_ASSIGN"; }
 };
 
-class OpScolon : public Operator {
+class OpGe : public Operator {
 public:
-    OpScolon() : Operator(OP_SCOLON) {}
-    std::string as_string() const override { return "OP_SCOLON"; }
+    OpGe() : Operator(OP_GE) {}
+    std::string as_string() const override { return "OP_GE"; }
 };
 
-class OpColon : public Operator {
+class OpLe : public Operator {
 public:
-    OpColon() : Operator(OP_COLON) {}
-    std::string as_string() const override { return "OP_COLON"; }
+    OpLe() : Operator(OP_LE) {}
+    std::string as_string() const override { return "OP_LE"; }
 };
 }
-
-
 
 #endif
