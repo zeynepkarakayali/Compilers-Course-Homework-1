@@ -91,8 +91,6 @@ class-declaration: KW_CLASS iden compound-stmt {$$ = Node::add<ast::ClassStateme
 
 fun-declaration: KW_FUNC iden arguments type-annot compound-stmt { $$ = Node::add<ast::FuncStatement>($2, $3, $4, $5); };
 
-type-annot: OP_COLON iden  {$$ = $2;};
-
 
 arguments:   OP_LPAREN arg-list OP_RPAREN {$$=$2;}
            | OP_LPAREN OP_RPAREN
@@ -128,7 +126,11 @@ if_body: KW_IF OP_LPAREN expression OP_RPAREN compound-stmt;
 
 while_stmt: KW_WHILE OP_LPAREN expression OP_RPAREN compound-stmt;
 
-let_stmt: KW_LET IDENTIFIER OP_ASSIGN expression ;
+let_stmt:   KW_LET iden OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, nullptr, $4); }
+          | KW_LET iden type-annot { $$ = Node::add<ast::LetStatement>($2, nullptr, $3); }
+          | KW_LET iden type-annot OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, $3, $5); }
+
+        ;
 
 
 compound-stmt:    OP_LBRACE statements OP_RBRACE { 
@@ -151,6 +153,8 @@ expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3)
             | expression OP_BIGGER expression { $$ = Node::add<ast::OpBigger>($1, $3); }
             | OP_LPAREN expression OP_RPAREN { $$ = $2; }
             | L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
+
+type-annot: OP_COLON iden  {$$ = $2;};
 
 iden: IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); }
  	;

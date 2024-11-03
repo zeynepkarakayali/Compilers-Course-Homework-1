@@ -93,6 +93,39 @@ class ImportStatement : public Node{
 
 };
 
+class LetStatement : public Node{
+    public:
+        LetStatement(Node::Cptr iden, Node::Cptr type=nullptr, Node::Cptr stmt=nullptr) : Node(), m_iden(iden), m_type(type), m_stmt(stmt) { 
+        if (!iden ) {
+            throw std::runtime_error("FuncStatement constructor received a nullptr iden");
+        }
+
+    
+        }
+
+
+        std::string as_string() const override 
+        {   
+            if (m_type){
+                if(m_stmt){
+                    return fmt::format("Let(n={}, t={}, i={})", 
+                                    m_iden->as_string(), 
+                                    m_type->as_string(), 
+                                    m_stmt->as_string());
+                }
+            return fmt::format("Let(n={}, t={})", m_iden->as_string(), m_type->as_string());
+            }
+            return fmt::format("Let(n={}, i={})", m_iden->as_string(), m_stmt->as_string());
+
+        } 
+
+    private:
+       Node::Cptr m_iden;
+       Node::Cptr m_type;
+       Node::Cptr m_stmt;
+
+};  
+
 
 }
 
