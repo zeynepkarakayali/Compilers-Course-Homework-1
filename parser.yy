@@ -30,6 +30,8 @@ extern int yylineno;
 %token    OP_LBRACE
 %token    OP_RBRACE
 %token    OP_COMMA
+%token    OP_LE
+%token    OP_GE
 %token    OP_SMALLER
 %token    OP_BIGGER
 %token    OP_EQUALS
@@ -51,6 +53,7 @@ extern int yylineno;
 
 %left      OP_EQUALS
 %left      OP_SMALLER OP_BIGGER
+%left      OP_LE OP_GE
 %left      OP_PLUS OP_MINUS
 %left      OP_MULT OP_DIVF
 
@@ -124,7 +127,8 @@ if_stmt: if_body KW_ELSE compound-stmt
 
 if_body: KW_IF OP_LPAREN expression OP_RPAREN compound-stmt;
 
-while_stmt: KW_WHILE OP_LPAREN expression OP_RPAREN compound-stmt;
+while_stmt:   KW_WHILE OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node::add<ast::WhileStatement>($3, $5); };
+
 
 let_stmt:   KW_LET iden OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, nullptr, $4); }
           | KW_LET iden type-annot { $$ = Node::add<ast::LetStatement>($2, nullptr, $3); }
@@ -144,15 +148,22 @@ compound-stmt:    OP_LBRACE statements OP_RBRACE {
                 | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
              ;
 
+
 expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
             | expression OP_MULT expression { $$ = Node::add<ast::OpMult>($1, $3); }
             | expression OP_DIVF expression { $$ = Node::add<ast::OpDivF>($1, $3); }
+            | expression OP_LE expression { $$ = Node::add<ast::OpLe>($1, $3); }
+            | expression OP_GE expression { $$ = Node::add<ast::OpGe>($1, $3); }
             | expression OP_EQUALS expression { $$ = Node::add<ast::OpEquals>($1, $3); }
             | expression OP_SMALLER expression { $$ = Node::add<ast::OpSmaller>($1, $3); }
             | expression OP_BIGGER expression { $$ = Node::add<ast::OpBigger>($1, $3); }
             | OP_LPAREN expression OP_RPAREN { $$ = $2; }
             | L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
+            | iden
+            ;
+
+
 
 type-annot: OP_COLON iden  {$$ = $2;};
 

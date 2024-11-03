@@ -98,6 +98,18 @@ public:
     std::string as_string() const override { return "OP_ASSIGN"; }
 };
 
+class OpGe : public Operator {
+public:
+    OpGe() : Operator(OP_GE) {}
+    std::string as_string() const override { return "OP_GE"; }
+};
+
+class OpLe : public Operator {
+public:
+    OpLe() : Operator(OP_LE) {}
+    std::string as_string() const override { return "OP_LE"; }
+};
+
 }
 
 

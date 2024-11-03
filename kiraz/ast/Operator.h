@@ -29,13 +29,15 @@ public:
             case OP_MINUS: opstr = "Sub"; break;
             case OP_MULT:  opstr = "Mult"; break;
             case OP_DIVF:  opstr = "DivF"; break;
-            case OP_SMALLER:  opstr = "Smaller"; break;
-            case OP_BIGGER:   opstr = "Bigger"; break;
-            case OP_EQUALS:   opstr = "Equals"; break;
+            case OP_SMALLER:  opstr = "OpLt"; break;
+            case OP_BIGGER:   opstr = "OpGt"; break;
+            case OP_EQUALS:   opstr = "OpEq"; break;
             case OP_ASSIGN:  opstr = "Assign"; break;
+            case OP_GE:   opstr = "OpGe"; break;
+            case OP_LE:  opstr = "OpLe"; break;
             default: break;
         }
-        return fmt::format("{}({},{})", opstr, get_left()->as_string(), get_right()->as_string());
+        return fmt::format("{}(l={},r={})", opstr, get_left()->as_string(), get_right()->as_string());
     }
 
 private:
@@ -82,6 +84,16 @@ public:
 class OpAssign : public OpBinary {
 public:
     OpAssign(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_ASSIGN, left, right) {}   
+};
+
+class OpGe : public OpBinary {
+public:
+    OpGe(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_GE, left, right) {}   
+};
+
+class OpLe : public OpBinary {
+public:
+    OpLe(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_LE, left, right) {}   
 };
 
 }

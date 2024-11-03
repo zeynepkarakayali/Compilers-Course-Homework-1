@@ -20,6 +20,7 @@ public:
 
     std::string as_string() const override {
         std::string result= "";
+        result+="[";
         std::vector<std::shared_ptr<Node>> temp_statements = statements; 
 
         for (size_t i = 0; i < temp_statements.size(); ++i) {
@@ -28,8 +29,8 @@ public:
                 result += ", ";  
             }
         }
-        result.resize(result.size() - 2);
-        result+= "])";
+        //result.resize(result.size() - 2);
+        result+= "]";
         return result;
     }
     
@@ -53,7 +54,7 @@ class FuncStatement : public Node{
         }
     }
         std::string as_string() const override 
-        {return fmt::format("Func(n={}, a=FuncArgs([{}]), r={}, s=[{}])", m_iden->as_string(), m_args->as_string(),  m_type->as_string(),  m_scope->as_string()); }
+        {return fmt::format("Func(n={}, a=FuncArgs([{}]), r={}, s={})", m_iden->as_string(), m_args->as_string(),  m_type->as_string(),  m_scope->as_string()); }
 
     private:
        Node::Cptr m_iden;
@@ -125,6 +126,22 @@ class LetStatement : public Node{
        Node::Cptr m_stmt;
 
 };  
+
+
+
+class WhileStatement : public Node{
+    public:
+        WhileStatement(Node::Cptr exp, Node::Cptr scope) : Node(), m_exp(exp), m_scope(scope) {    
+
+    }
+        std::string as_string() const override 
+        {return fmt::format("While(?={}, repeat={})", m_exp->as_string(), m_scope->as_string()); }
+
+    private:
+       Node::Cptr m_exp;
+       Node::Cptr m_scope;
+
+};
 
 
 }
