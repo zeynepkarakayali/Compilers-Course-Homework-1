@@ -47,7 +47,6 @@ extern std::shared_ptr<Token> curtoken;
 
 [ \n\t]+ {colno+= yyleng;}
 
-
 "import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
 "func" {colno += yyleng; curtoken = Token::New<KwFunc> (); return KW_FUNC;}
 "if" {colno += yyleng; curtoken = Token::New<KwIf> (); return KW_IF;}

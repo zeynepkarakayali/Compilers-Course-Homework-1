@@ -78,10 +78,10 @@ statements:   statements statement OP_SCOLON {
           ;
 
 statement:   let_stmt { $$ = $1; }  
-           | if_stmt { $$ = $1; }  
            | while_stmt { $$ = $1; }  
            | expression { $$ = $1; }  
            | import-stmt { $$ = $1; }  
+           | if-stmt { $$ = $1; } 
            | fun-declaration { $$ = $1; }  
            | class-declaration { $$ = $1; }  
            ;
@@ -121,11 +121,10 @@ arg: iden type-annot  { $$ = Node::add<ast::Argument>($1, $2);}
 
 
 
-if_stmt: if_body KW_ELSE compound-stmt
-        | if_body
-        ;
+if-stmt:   KW_IF OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node::add<ast::IfStatement>($3, $5, nullptr); } // if(a) {}
+         | KW_IF OP_LPAREN expression OP_RPAREN compound-stmt KW_ELSE if-stmt { $$ = Node::add<ast::IfStatement>($3, $5, $7); } // if(a) {} else if(b) { s2; }
+         | KW_IF OP_LPAREN expression OP_RPAREN compound-stmt KW_ELSE compound-stmt { $$ = Node::add<ast::IfStatement>($3, $5, $7); }; // if(a) {} else { s3; }
 
-if_body: KW_IF OP_LPAREN expression OP_RPAREN compound-stmt;
 
 while_stmt:   KW_WHILE OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node::add<ast::WhileStatement>($3, $5); };
 

@@ -144,6 +144,28 @@ class WhileStatement : public Node{
 };
 
 
+
+
+class IfStatement : public Node {
+public:
+    IfStatement(Node::Cptr exp, Node::Cptr scope, Node::Cptr else_scope = nullptr) 
+        : Node(), m_exp(exp), m_scope(scope), m_else_scope(else_scope) { }
+
+    std::string as_string() const override 
+    {
+        if (m_else_scope) {
+            return fmt::format("If(?={}, then={}, else={})", m_exp->as_string(), m_scope->as_string(), m_else_scope->as_string());
+        }
+        return fmt::format("If(?={}, then={}, else=[]) ", m_exp->as_string(), m_scope->as_string());
+    }
+
+private:
+    Node::Cptr m_exp;        
+    Node::Cptr m_scope;      
+    Node::Cptr m_else_scope; 
+};
+
+
 }
 
 
