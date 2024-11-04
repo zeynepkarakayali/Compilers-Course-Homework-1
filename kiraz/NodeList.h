@@ -19,7 +19,8 @@ public:
 
     std::string as_string() const override {
         std::string result= "";
-        if(getQueueSize()>1) {result+= "Module(["; }
+        //if(getQueueSize()>1) {result+= "Module(["; }
+        result+= "Module(["; 
         std::queue<NodePtr> tempQueue = nodeQueue; 
 
         while (!tempQueue.empty()) {
@@ -27,7 +28,8 @@ public:
             tempQueue.pop();
         }
         result.resize(result.size() - 2);
-        if(getQueueSize()>1) {result+= "])"; }
+        //if(getQueueSize()>1) {result+= "])"; }
+        result+= "])";
         return result;
     }
 
