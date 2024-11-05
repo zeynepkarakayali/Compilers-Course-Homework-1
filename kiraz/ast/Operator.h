@@ -35,6 +35,7 @@ public:
             case OP_ASSIGN:  opstr = "Assign"; break;
             case OP_GE:   opstr = "OpGe"; break;
             case OP_LE:  opstr = "OpLe"; break;
+            case OP_DOT:  opstr = "Dot"; break;
             default: break;
         }
         return fmt::format("{}(l={}, r={})", opstr, get_left()->as_string(), get_right()->as_string());
@@ -94,6 +95,10 @@ public:
 class OpLe : public OpBinary {
 public:
     OpLe(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_LE, left, right) {}   
+};
+class OpDot : public OpBinary {
+public:
+    OpDot(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_DOT, left, right) {}   
 };
 
 }

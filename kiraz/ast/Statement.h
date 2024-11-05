@@ -175,6 +175,21 @@ public:
 private:
     Node::Cptr m_exp;        
 };
+
+
+class CallStatement : public Node {
+public:
+    CallStatement(Node::Cptr exp, Node::Cptr args = nullptr) : Node(), m_exp(exp) , m_args(args){ }
+    std::string as_string() const override { 
+        if(m_args) {return fmt::format("Call(n={}, a=FuncArgs([{}]))", m_exp->as_string(), m_args->as_string());}
+         return fmt::format("Call(n={} ,a=[()])", m_exp->as_string());
+        
+    }
+
+private:
+    Node::Cptr m_exp;      
+    Node::Cptr m_args;          
+};
 }
 
 

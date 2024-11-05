@@ -30,15 +30,12 @@ class ArgList : public Node {
 public:
     using Ptr = std::shared_ptr<ArgList>;
 
-    // Varsayılan yapıcı fonksiyon
     ArgList() = default;
 
-    // Argüman ekleme işlevi
     void add_argument(const Argument::Ptr& arg) {
         arguments.push_back(arg);
     }
 
-    // Argüman listesini geri döndürme işlevi (const referans ile)
     const std::vector<Argument::Ptr>& get_arguments() const {
         return arguments;
     }
@@ -47,7 +44,7 @@ public:
         for (size_t i = 0; i < arguments.size(); ++i) {
             oss << arguments[i]->as_string();
             if (i < arguments.size() - 1) {
-                oss << ", ";  // Argümanlar arasında virgül koy
+                oss << ", ";  
             }
         }
         return oss.str();
@@ -55,7 +52,7 @@ public:
     }
 
 private:
-    std::vector<Argument::Ptr> arguments; // Argument işaretçilerini saklayan liste
+    std::vector<Argument::Ptr> arguments; 
 };
 
 

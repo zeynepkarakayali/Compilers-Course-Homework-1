@@ -4,12 +4,18 @@
 #include "Node.h"
 #include <queue>
 #include <memory>
+#include <string>
 
 class NodeList : public Node {
 public:
     using NodePtr = std::shared_ptr<Node>;
 
-    NodeList() : Node() {}
+    enum Mode {
+        WITH_MODULE,
+        WITHOUT_MODULE
+    };
+
+    explicit NodeList(Mode mode = WITH_MODULE) : Node(), mode(mode) {}
 
     ~NodeList() override = default;
 
@@ -19,8 +25,9 @@ public:
 
     std::string as_string() const override {
         std::string result= "";
-        //if(getQueueSize()>1) {result+= "Module(["; }
-        result+= "Module(["; 
+        if (mode == WITH_MODULE) {
+            result += "Module([";
+        } 
         std::queue<NodePtr> tempQueue = nodeQueue; 
 
         while (!tempQueue.empty()) {
@@ -28,8 +35,9 @@ public:
             tempQueue.pop();
         }
         result.resize(result.size() - 2);
-        //if(getQueueSize()>1) {result+= "])"; }
-        result+= "])";
+        if (mode == WITH_MODULE) {
+            result += "])";
+        }
         return result;
     }
 
@@ -55,9 +63,13 @@ public:
         }
         return nodes;
     }
+    void setMode(Mode newMode) {
+        mode = newMode;
+    }
 
 private:
     std::queue<NodePtr> nodeQueue;
+    Mode mode;
 };
 
 #endif // KIRAZ_NODELIST_H
