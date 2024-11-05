@@ -29,6 +29,18 @@ private:
     int m_operator;
     Node::Cptr m_operand;
 };
+
+class StringLiteral : public Node {
+    public:
+        StringLiteral(Token::Ptr str) : Node(), m_str(str) {}
+
+        std::string as_string() const override {return fmt::format("Str({})", m_str->as_string());}
+
+    private:
+        Token::Ptr m_str;
+};
+
+
 }
 
 #endif

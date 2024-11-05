@@ -57,7 +57,7 @@ static int handle_mode_file(std::string_view arg) {
 }
 
 int main(int argc, char **argv) {
-    yydebug = 1;
+    yydebug = 0;
 
     static Mode mode = MODE_UNKNOWN;
 

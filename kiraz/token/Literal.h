@@ -25,6 +25,20 @@ private:
     std::string m_value;
 };
 
+
+class StringLiteral : public Token {
+public:
+    StringLiteral(const std::string& value) : Token(STRING_LITERAL), value(value) {}
+
+    virtual std::string as_string() const override {
+        return value;
+    }
+
+private:
+    std::string value;
+};
+
+
 }
 
 #endif // KIRAZ_TOKEN_LITERAL_H

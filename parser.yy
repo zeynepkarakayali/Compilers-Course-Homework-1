@@ -47,6 +47,7 @@ extern int yylineno;
 %token    KW_CLASS
 %token    KW_RETURN
 
+%token    STRING_LITERAL
 %token    IDENTIFIER
 
 %left      OP_SCOLON
@@ -236,6 +237,7 @@ expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3);
             | signed_int {$$ = $1;}
             | integer {$$ = $1;}
             | iden {$$ = $1;}
+            | STRING_LITERAL { $$ = Node::add<ast::StringLiteral>(curtoken); }
             ;
 
 type-annot: OP_COLON iden  {$$ = $2;};
