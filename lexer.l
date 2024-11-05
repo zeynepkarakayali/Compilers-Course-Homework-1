@@ -15,7 +15,6 @@ static auto &colno = Token::colno; // Since it's declared as static, it belongs 
                                     // Reference initialization: Binds a reference to an object.
 
 
-static auto &colno = Token::colno;
 using namespace token;
 extern std::shared_ptr<Token> curtoken;
 %}
@@ -25,8 +24,8 @@ extern std::shared_ptr<Token> curtoken;
 
 %%
 
-"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
 "func" {colno += yyleng; curtoken = Token::New<KwFunc> (); return KW_FUNC;}
+"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
 "if" {colno += yyleng; curtoken = Token::New<KwIf> (); return KW_IF;}
 "else" {colno += yyleng; curtoken = Token::New<KwElse> (); return KW_ELSE;}
 "while" {colno += yyleng; curtoken = Token::New<KwWhile> (); return KW_WHILE;}
@@ -57,7 +56,6 @@ extern std::shared_ptr<Token> curtoken;
 "{" {colno += yyleng; curtoken = Token::New<OpLbrace> (); return OP_LBRACE; } 
 "}" {colno += yyleng; curtoken = Token::New<OpRbrace> (); return OP_RBRACE; } 
 "," {colno += yyleng; curtoken = Token::New<OpComma> (); return OP_COMMA; } 
-
 
 [ \n\t]+ {colno+= yyleng;}
 

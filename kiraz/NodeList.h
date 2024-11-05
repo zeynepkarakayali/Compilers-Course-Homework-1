@@ -18,12 +18,11 @@ public:
     }
 
     std::string as_string() const override {
-        std::string result= "";
-        if(getQueueSize()>1) {result+= "Module(["; }
-        std::queue<NodePtr> tempQueue = nodeQueue; 
+        std::string result = "[ ";
+        std::queue<NodePtr> tempQueue = nodeQueue;
 
         while (!tempQueue.empty()) {
-            result += tempQueue.front()->as_string() + ", "; 
+            result += tempQueue.front()->as_string() + ", ";
             tempQueue.pop();
         }
         result.resize(result.size() - 2);

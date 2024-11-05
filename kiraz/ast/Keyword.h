@@ -14,7 +14,7 @@ class KwImport : public Node{
 class KwFunc : public Node{
     public:
         KwFunc() : Node() {}
-        std::string as_string() const override {return fmt::format("Func"); }
+        std::string as_string() const override {return fmt::format("KW_FUNC"); }
 
 };
 
