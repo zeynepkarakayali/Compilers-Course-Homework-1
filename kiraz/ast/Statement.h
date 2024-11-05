@@ -42,19 +42,22 @@ private:
 
 class FuncStatement : public Node{
     public:
-        FuncStatement(Node::Cptr iden, Node::Cptr args, Node::Cptr type, Node::Cptr scope) : Node(), m_iden(iden), m_args(args), m_type(type), m_scope(scope) {    
+        FuncStatement(Node::Cptr iden, Node::Cptr type, Node::Cptr scope, Node::Cptr args=nullptr) : Node(), m_iden(iden), m_type(type), m_scope(scope) , m_args(args){    
         if (!iden ) {
             throw std::runtime_error("FuncStatement constructor received a nullptr iden");
-        }
-        if(!args){
-            throw std::runtime_error("FuncStatement constructor received a nullptr args");
         }
         if(!type){
             throw std::runtime_error("FuncStatement constructor received a nullptr type");
         }
     }
         std::string as_string() const override 
-        {return fmt::format("Func(n={}, a=FuncArgs([{}]), r={}, s={})", m_iden->as_string(), m_args->as_string(),  m_type->as_string(),  m_scope->as_string()); }
+        {
+            if(m_args){
+                return fmt::format("Func(n={}, a=FuncArgs([{}]), r={}, s={})", m_iden->as_string(), m_args->as_string(),  
+                                                                               m_type->as_string(),  m_scope->as_string()); }
+            else {return fmt::format("Func(n={}, a=[], r={}, s={})", m_iden->as_string(),  
+                                                                               m_type->as_string(),  m_scope->as_string()); }
+        }
 
     private:
        Node::Cptr m_iden;
@@ -74,7 +77,7 @@ class ClassStatement : public Node{
         }
     }
         std::string as_string() const override 
-        {return fmt::format("Class(n={}, s=[{}])", m_iden->as_string(),  m_scope->as_string()); }
+        {return fmt::format("Class(n={}, s={})", m_iden->as_string(),  m_scope->as_string()); }
 
     private:
        Node::Cptr m_iden;
@@ -100,8 +103,6 @@ class LetStatement : public Node{
         if (!iden ) {
             throw std::runtime_error("FuncStatement constructor received a nullptr iden");
         }
-
-    
         }
 
 
@@ -114,7 +115,7 @@ class LetStatement : public Node{
                                     m_type->as_string(), 
                                     m_stmt->as_string());
                 }
-            return fmt::format("Let(n={}, t={})", m_iden->as_string(), m_type->as_string());
+                else {return fmt::format("Let(n={}, t={})", m_iden->as_string(), m_type->as_string());}
             }
             return fmt::format("Let(n={}, i={})", m_iden->as_string(), m_stmt->as_string());
 
@@ -156,7 +157,7 @@ public:
         if (m_else_scope) {
             return fmt::format("If(?={}, then={}, else={})", m_exp->as_string(), m_scope->as_string(), m_else_scope->as_string());
         }
-        return fmt::format("If(?={}, then={}, else=[]) ", m_exp->as_string(), m_scope->as_string());
+        return fmt::format("If(?={}, then={}, else=[])", m_exp->as_string(), m_scope->as_string());
     }
 
 private:
@@ -165,11 +166,15 @@ private:
     Node::Cptr m_else_scope; 
 };
 
+class ReturnStatement : public Node {
+public:
+    ReturnStatement(Node::Cptr exp) : Node(), m_exp(exp) { }
+    std::string as_string() const override { return fmt::format("Return({})", m_exp->as_string());}
 
+private:
+    Node::Cptr m_exp;        
+};
 }
-
-
-
 
 
 #endif

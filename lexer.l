@@ -10,10 +10,6 @@
 #include <kiraz/token/Operator.h>
 #include <kiraz/token/Keyword.h>
 #include <kiraz/token/Identifier.h>
-static auto &colno = Token::colno; // Since it's declared as static, it belongs to the class itself, not to any particular instance of the class. 
-                                    // Therefore, Token::colno is shared across all instances of the Token class.
-                                    // Reference initialization: Binds a reference to an object.
-
 
 using namespace token;
 extern std::shared_ptr<Token> curtoken;
@@ -24,17 +20,8 @@ extern std::shared_ptr<Token> curtoken;
 
 %%
 
-"func" {colno += yyleng; curtoken = Token::New<KwFunc> (); return KW_FUNC;}
-"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
-"if" {colno += yyleng; curtoken = Token::New<KwIf> (); return KW_IF;}
-"else" {colno += yyleng; curtoken = Token::New<KwElse> (); return KW_ELSE;}
-"while" {colno += yyleng; curtoken = Token::New<KwWhile> (); return KW_WHILE;}
-"let" {colno += yyleng; curtoken = Token::New<KwLet> (); return KW_LET;}
-"class" {colno += yyleng; curtoken = Token::New<KwClass> (); return KW_CLASS;}
-
+\"[^"]*\" { colno += yyleng; curtoken = Token::New<String>(std::string(yytext, 1, yyleng - 2)); return L_STRING; }
 [0-9]+ {colno += yyleng; curtoken = Token::New<Integer> (10, yytext); return L_INTEGER; }
-
-[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
 
 
 "+" {colno += yyleng; curtoken = Token::New<OpPlus> (); return OP_PLUS; }
@@ -58,5 +45,16 @@ extern std::shared_ptr<Token> curtoken;
 "," {colno += yyleng; curtoken = Token::New<OpComma> (); return OP_COMMA; } 
 
 [ \n\t]+ {colno+= yyleng;}
+
+"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
+"func" {colno += yyleng; curtoken = Token::New<KwFunc> (); return KW_FUNC;}
+"if" {colno += yyleng; curtoken = Token::New<KwIf> (); return KW_IF;}
+"else" {colno += yyleng; curtoken = Token::New<KwElse> (); return KW_ELSE;}
+"while" {colno += yyleng; curtoken = Token::New<KwWhile> (); return KW_WHILE;}
+"let" {colno += yyleng; curtoken = Token::New<KwLet> (); return KW_LET;}
+"class" {colno += yyleng; curtoken = Token::New<KwClass> (); return KW_CLASS;}
+"return" {colno += yyleng; curtoken = Token::New<KwClass> (); return KW_RETURN;}
+
+[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
 
 .    {colno += yyleng; curtoken = Token::New<Rejected> ("Rejected"); return YYUNDEF; }

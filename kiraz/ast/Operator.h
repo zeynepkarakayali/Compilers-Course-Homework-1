@@ -37,7 +37,7 @@ public:
             case OP_LE:  opstr = "OpLe"; break;
             default: break;
         }
-        return fmt::format("{}(l={},r={})", opstr, get_left()->as_string(), get_right()->as_string());
+        return fmt::format("{}(l={}, r={})", opstr, get_left()->as_string(), get_right()->as_string());
     }
 
 private:

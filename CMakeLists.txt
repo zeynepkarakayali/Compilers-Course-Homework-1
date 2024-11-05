@@ -130,9 +130,6 @@ add_library(kiraz STATIC
     kiraz/ast/Literal.h
     kiraz/ast/Literal.cpp
 
-    kiraz/ast/Keyword.h
-    kiraz/ast/Keyword.cpp
-
     kiraz/ast/List.h
     kiraz/ast/List.cpp
 

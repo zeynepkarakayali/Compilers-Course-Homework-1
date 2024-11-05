@@ -16,6 +16,6 @@ Integer::Integer(Token::Ptr t) : Node(){
     catch (std::out_of_range &e){
         // TODO mark this node as invalid
     }
-} 
+}
 
 }
