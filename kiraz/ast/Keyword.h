@@ -49,6 +49,12 @@ class KwClass : public Node{
         std::string as_string() const override {return fmt::format("KW_CLASS"); }
 };
 
+class KwReturn : public Node{
+    public:
+        KwReturn() : Node() {}
+        std::string as_string() const override {return fmt::format("KW_RETURN"); }
+};
+
 }
 
 

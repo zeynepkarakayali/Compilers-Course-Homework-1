@@ -54,6 +54,8 @@ extern std::shared_ptr<Token> curtoken;
 "while" {colno += yyleng; curtoken = Token::New<KwWhile> (); return KW_WHILE;}
 "let" {colno += yyleng; curtoken = Token::New<KwLet> (); return KW_LET;}
 "class" {colno += yyleng; curtoken = Token::New<KwClass> (); return KW_CLASS;}
+"return" {colno += yyleng; curtoken = Token::New<KwClass> (); return KW_RETURN;}
+
 
 [a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
 

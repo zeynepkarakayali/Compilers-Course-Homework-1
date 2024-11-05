@@ -46,6 +46,7 @@ extern int yylineno;
 %token    KW_ELSE
 %token    KW_WHILE
 %token    KW_CLASS
+%token    KW_RETURN
 
 %token    IDENTIFIER
 
@@ -100,6 +101,7 @@ general_scope_statement:    while_stmt { $$ = $1; }
                           | let_stmt { $$ = $1; }  
                           | expression { $$ = $1; }  
                           | if-stmt { $$ = $1; } 
+                          | return-exp { $$ = $1; } 
 
 
 import-stmt: KW_IMPORT iden { $$ = Node::add<ast::ImportStatement>($2); };
@@ -184,7 +186,9 @@ func-statements: func-statements func-statement OP_SCOLON {
                                                             }
                 ;
 
-func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} ;
+func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} ;
+
+return-exp: KW_RETURN expression {$$ = Node::add<ast::ReturnStatement>($2);};
 
 if-stmt:   KW_IF OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node::add<ast::IfStatement>($3, $5, nullptr); } // if(a) {}
          | KW_IF OP_LPAREN expression OP_RPAREN compound-stmt KW_ELSE if-stmt { $$ = Node::add<ast::IfStatement>($3, $5, $7); } // if(a) {} else if(b) { s2; }

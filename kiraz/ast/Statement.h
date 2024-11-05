@@ -167,6 +167,14 @@ private:
 };
 
 
+class ReturnStatement : public Node {
+public:
+    ReturnStatement(Node::Cptr exp) : Node(), m_exp(exp) { }
+    std::string as_string() const override { return fmt::format("Return({})", m_exp->as_string());}
+
+private:
+    Node::Cptr m_exp;        
+};
 }
 
 
