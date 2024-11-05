@@ -22,8 +22,6 @@ extern int yylineno;
 %token    OP_MINUS
 %token    OP_MULT
 %token    OP_DIVF
-%token    OP_LPAREN
-%token    OP_RPAREN
 %token    OP_COLON
 %token    OP_SCOLON
 %token    OP_LBRACE
@@ -35,6 +33,8 @@ extern int yylineno;
 %token    OP_BIGGER
 %token    OP_EQUALS
 %token    OP_ASSIGN
+%token    OP_LPAREN
+%token    OP_RPAREN
 
 %token    L_INTEGER
 
@@ -45,16 +45,19 @@ extern int yylineno;
 %token    KW_ELSE
 %token    KW_WHILE
 %token    KW_CLASS
+%token    KW_RETURN
 
+%token    L_STRING
 %token    IDENTIFIER
 
 %left      OP_SCOLON
-%left      OP_ASSIGN
+%right     OP_ASSIGN
 %left      OP_EQUALS
 %left      OP_SMALLER OP_BIGGER
 %left      OP_LE OP_GE
 %left      OP_PLUS OP_MINUS
 %left      OP_MULT OP_DIVF
+
 
 %%
 
@@ -99,6 +102,7 @@ general_scope_statement:    while_stmt { $$ = $1; }
                           | let_stmt { $$ = $1; }  
                           | expression { $$ = $1; }  
                           | if-stmt { $$ = $1; } 
+                          | return-exp { $$ = $1; } 
 
 
 import-stmt: KW_IMPORT iden { $$ = Node::add<ast::ImportStatement>($2); };
@@ -183,7 +187,9 @@ func-statements: func-statements func-statement OP_SCOLON {
                                                             }
                 ;
 
-func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} ;
+func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} ;
+
+return-exp: KW_RETURN expression {$$ = Node::add<ast::ReturnStatement>($2);};
 
 if-stmt:   KW_IF OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node::add<ast::IfStatement>($3, $5, nullptr); } // if(a) {}
          | KW_IF OP_LPAREN expression OP_RPAREN compound-stmt KW_ELSE if-stmt { $$ = Node::add<ast::IfStatement>($3, $5, $7); } // if(a) {} else if(b) { s2; }
@@ -212,6 +218,9 @@ compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE {
              ;
 
 
+
+
+
 expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
             | expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
@@ -225,7 +234,10 @@ expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3);
             | OP_LPAREN expression OP_RPAREN { $$ = $2; }
             | OP_MINUS OP_LPAREN expression OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_MINUS, $3); }
             | OP_PLUS OP_LPAREN expression OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_PLUS, $3); }
-            | signed_int
+            | signed_int {$$ = $1;}
+            | integer {$$ = $1;}
+            | iden {$$ = $1;}
+            | L_STRING { $$ = Node::add<ast::String>(curtoken); }
             ;
 
 type-annot: OP_COLON iden  {$$ = $2;};
@@ -233,12 +245,13 @@ type-annot: OP_COLON iden  {$$ = $2;};
 iden: IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); }
  	;
 
-signed_int: integer
-    | OP_PLUS integer { $$ = Node::add<ast::SignedNode>(OP_PLUS, $2); }
-    | OP_MINUS integer { $$ = Node::add<ast::SignedNode>(OP_MINUS, $2); }
-    ;
+signed_int: 
+            OP_PLUS integer { $$ = Node::add<ast::SignedNode>(OP_PLUS, $2); }
+            | OP_MINUS integer { $$ = Node::add<ast::SignedNode>(OP_MINUS, $2); }
+            ;
 
 integer: L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); } ;
+
 %%
 
 

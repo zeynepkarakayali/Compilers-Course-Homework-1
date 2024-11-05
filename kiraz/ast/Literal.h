@@ -14,6 +14,32 @@ private:
     int64_t m_value;
 };
 
+class String : public Node {
+public:
+    String(Token::Ptr str) : Node(), m_str(str) {}
+
+    std::string as_string() const override {
+        std::string value = m_str->as_string();
+
+        std::string::size_type pos = 0;
+        while ((pos = value.find("\\", pos)) != std::string::npos) {
+            if (pos + 1 < value.size()) {
+                if (value[pos + 1] == 'n') {
+                    value.replace(pos, 2, "\n");
+                } else if (value[pos + 1] == 't') {
+                    value.replace(pos, 2, "\t");
+                }
+            }
+            pos += 1;
+        }
+        
+        return fmt::format("Str({})", value);
+    }
+
+private:    
+    Token::Ptr m_str;
+};
+
 class SignedNode : public Node {
 public:
     SignedNode(int op, Node::Cptr operand) : Node(), m_operator(op), m_operand(operand) {}

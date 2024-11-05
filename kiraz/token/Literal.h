@@ -2,6 +2,7 @@
 #define KIRAZ_TOKEN_LITERAL_H
 
 #include <kiraz/Token.h>
+#include <string_view>
 
 namespace token {
 
@@ -23,6 +24,16 @@ private:
     int m_id;
     int64_t m_base;
     std::string m_value;
+};
+
+class String : public Token {
+public:
+    String(const std::string& value) : Token(L_STRING), value(value) {}
+
+    std::string as_string() const override {return value;}
+
+private:
+    std::string value;
 };
 
 }
