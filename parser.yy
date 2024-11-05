@@ -22,8 +22,6 @@ extern int yylineno;
 %token    OP_MINUS
 %token    OP_MULT
 %token    OP_DIVF
-%token    OP_LPAREN
-%token    OP_RPAREN
 %token    OP_COLON
 %token    OP_SCOLON
 %token    OP_LBRACE
@@ -35,6 +33,8 @@ extern int yylineno;
 %token    OP_BIGGER
 %token    OP_EQUALS
 %token    OP_ASSIGN
+%token    OP_LPAREN
+%token    OP_RPAREN
 
 %token    L_INTEGER
 
@@ -50,12 +50,13 @@ extern int yylineno;
 %token    IDENTIFIER
 
 %left      OP_SCOLON
-%left      OP_ASSIGN
+%right     OP_ASSIGN
 %left      OP_EQUALS
 %left      OP_SMALLER OP_BIGGER
 %left      OP_LE OP_GE
 %left      OP_PLUS OP_MINUS
 %left      OP_MULT OP_DIVF
+
 
 %%
 
@@ -216,6 +217,9 @@ compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE {
              ;
 
 
+
+
+
 expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
             | expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
@@ -227,17 +231,24 @@ expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3);
             | expression OP_SMALLER expression { $$ = Node::add<ast::OpSmaller>($1, $3); }
             | expression OP_BIGGER expression { $$ = Node::add<ast::OpBigger>($1, $3); }
             | OP_LPAREN expression OP_RPAREN { $$ = $2; }
-            | L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
-            | iden
+            | OP_MINUS OP_LPAREN expression OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_MINUS, $3); }
+            | OP_PLUS OP_LPAREN expression OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_PLUS, $3); }
+            | signed_int {$$ = $1;}
+            | integer {$$ = $1;}
+            | iden {$$ = $1;}
             ;
-
-
 
 type-annot: OP_COLON iden  {$$ = $2;};
 
 iden: IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); }
  	;
 
+signed_int: 
+            OP_PLUS integer { $$ = Node::add<ast::SignedNode>(OP_PLUS, $2); }
+            | OP_MINUS integer { $$ = Node::add<ast::SignedNode>(OP_MINUS, $2); }
+            ;
+
+integer: L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); } ;
 
 %%
 
