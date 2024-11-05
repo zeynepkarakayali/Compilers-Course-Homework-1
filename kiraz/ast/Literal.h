@@ -31,13 +31,23 @@ private:
 };
 
 class StringLiteral : public Node {
-    public:
-        StringLiteral(Token::Ptr str) : Node(), m_str(str) {}
+public:
+    StringLiteral(Token::Ptr str) : Node(), m_str(str) {}
 
-        std::string as_string() const override {return fmt::format("Str({})", m_str->as_string());}
+    std::string as_string() const override {
+        std::string value = m_str->as_string();
 
-    private:
-        Token::Ptr m_str;
+        std::string::size_type pos = 0;
+        while ((pos = value.find("\\n", pos)) != std::string::npos) {
+            value.replace(pos, 2, "\n"); 
+            pos += 1; 
+        }
+        
+        return fmt::format("Str({})", value);
+    }
+
+private:
+    Token::Ptr m_str; 
 };
 
 
