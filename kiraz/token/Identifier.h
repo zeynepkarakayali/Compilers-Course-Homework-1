@@ -16,11 +16,4 @@ class Identifier : public Token {
 
 }
 
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> origin/ceyda
 #endif

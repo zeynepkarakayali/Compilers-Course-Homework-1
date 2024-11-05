@@ -10,10 +10,6 @@
 #include <kiraz/token/Operator.h>
 #include <kiraz/token/Keyword.h>
 #include <kiraz/token/Identifier.h>
-static auto &colno = Token::colno; // Since it's declared as static, it belongs to the class itself, not to any particular instance of the class. 
-                                    // Therefore, Token::colno is shared across all instances of the Token class.
-                                    // Reference initialization: Binds a reference to an object.
-
 
 static auto &colno = Token::colno;
 using namespace token;

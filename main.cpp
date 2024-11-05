@@ -92,11 +92,7 @@ int main(int argc, char **argv) {
             return usage(argc, argv);
 
         case MODE_FILE:
-<<<<<<< HEAD
-            if (auto ret = handle_mode_file(argv[i]); ret != OK) { 
-=======
             if (auto ret = handle_mode_file(argv[i]); ret != OK) {
->>>>>>> origin/ceyda
                 return ret;
             }
             return 1;

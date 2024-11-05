@@ -4,24 +4,16 @@
 
 #include <kiraz/ast/Operator.h>
 #include <kiraz/ast/Literal.h>
-#include <kiraz/ast/Keyword.h>
 #include <kiraz/ast/Identifier.h>
 #include <kiraz/ast/Statement.h>
 #include <kiraz/ast/List.h>
 #include <kiraz/NodeList.h>
 
 #include <kiraz/token/Literal.h>
-#include <kiraz/token/Operator.h>
-#include <kiraz/token/Keyword.h>
-#include <kiraz/token/Identifier.h>
-
-#include <kiraz/Node.h>
-#include <kiraz/NodeList.h>
 
 int yyerror(const char *msg);
 extern std::shared_ptr<Token> curtoken;
 extern int yylineno;
-
 %}
 
 %token    REJECTED
@@ -45,7 +37,6 @@ extern int yylineno;
 %token    OP_ASSIGN
 
 %token    L_INTEGER
-%token    IDENTIFIER
 
 %token    KW_IMPORT
 %token    KW_FUNC
@@ -55,15 +46,15 @@ extern int yylineno;
 %token    KW_WHILE
 %token    KW_CLASS
 
+%token    IDENTIFIER
+
+%left      OP_SCOLON
+%left      OP_ASSIGN
 %left      OP_EQUALS
 %left      OP_SMALLER OP_BIGGER
 %left      OP_LE OP_GE
 %left      OP_PLUS OP_MINUS
 %left      OP_MULT OP_DIVF
-
-%right OP_ASSIGN
-
-%start program
 
 %%
 
@@ -84,26 +75,71 @@ statements:   statements statement OP_SCOLON {
                                              }
           ;
 
-statement:   let_stmt { $$ = $1; }  
-           | while_stmt { $$ = $1; }  
-           | expression { $$ = $1; }  
-           | import-stmt { $$ = $1; }  
-           | if-stmt { $$ = $1; } 
+statement:   import-stmt { $$ = $1; }  
            | fun-declaration { $$ = $1; }  
            | class-declaration { $$ = $1; }  
+           | general_scope_statement { $$ = $1; }  
            ;
+
+
+
+        
+general_scope_statements:   general_scope_statements general_scope_statement OP_SCOLON { 
+                                                                                        if (!$1) {$$ = Node::add<NodeList>();} 
+                                                                                        else {$$ = $1;}
+                                                                                        std::static_pointer_cast<NodeList>($1)->addNode($2);
+                                                                                        }
+                          |  general_scope_statement OP_SCOLON { 
+                                                        $$ = Node::add<NodeList>();
+                                                        std::static_pointer_cast<NodeList>($$)->addNode($1);
+                                                      }
+
+
+general_scope_statement:    while_stmt { $$ = $1; }  
+                          | let_stmt { $$ = $1; }  
+                          | expression { $$ = $1; }  
+                          | if-stmt { $$ = $1; } 
 
 
 import-stmt: KW_IMPORT iden { $$ = Node::add<ast::ImportStatement>($2); };
 
-class-declaration: KW_CLASS iden compound-stmt {$$ = Node::add<ast::ClassStatement>($2, $3); }
+
+
+class-declaration: KW_CLASS iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $3); }
                  ;
 
-fun-declaration: KW_FUNC iden arguments type-annot compound-stmt { $$ = Node::add<ast::FuncStatement>($2, $3, $4, $5); };
+class-scope : OP_LBRACE class-statements OP_RBRACE { 
+                                                    auto compoundStmt = Node::add<ast::CompoundStatement>();
+                                                    auto stmtList = std::dynamic_pointer_cast<NodeList>($2);
+                                                    if (stmtList) {
+                                                        for (const auto& stmt : stmtList->get_nodes()) { compoundStmt->add_statement(stmt);}
+                                                    } else { yyerror("Failed to cast statements to NodeList in compound statement");}
+                                                    $$ = compoundStmt;
+                                                }
+                | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
+             ;
+class-statements:   class-statements class-statement OP_SCOLON { 
+                                                                if (!$1) {$$ = Node::add<NodeList>();} 
+                                                                else {$$ = $1;}
+                                                                std::static_pointer_cast<NodeList>($1)->addNode($2);
+                                                                }
+                  |                  class-statement OP_SCOLON { 
+                                                                $$ = Node::add<NodeList>();
+                                                                std::static_pointer_cast<NodeList>($$)->addNode($1);
+                                                                }
+                  ;
+
+class-statement:    fun-declaration {$$=$1;} | let_stmt {$$=$1;} ;
+
+
+
+
+
+fun-declaration: KW_FUNC iden arguments type-annot func-scope { $$ = Node::add<ast::FuncStatement>($2, $4, $5, $3); };
 
 
 arguments:   OP_LPAREN arg-list OP_RPAREN {$$=$2;}
-           | OP_LPAREN OP_RPAREN
+           | OP_LPAREN OP_RPAREN {$$=nullptr;}
            ;
 
 arg-list:   arg-list OP_COMMA arg {     auto argList = std::dynamic_pointer_cast<ast::ArgList>($1); 
@@ -125,8 +161,29 @@ arg-list:   arg-list OP_COMMA arg {     auto argList = std::dynamic_pointer_cast
 arg: iden type-annot  { $$ = Node::add<ast::Argument>($1, $2);}
    ;
 
+func-scope: OP_LBRACE func-statements OP_RBRACE { 
+                                                    auto compoundStmt = Node::add<ast::CompoundStatement>();
+                                                    auto stmtList = std::dynamic_pointer_cast<NodeList>($2);
+                                                    if (stmtList) {
+                                                        for (const auto& stmt : stmtList->get_nodes()) { compoundStmt->add_statement(stmt);}
+                                                    } else { yyerror("Failed to cast statements to NodeList in compound statement");}
+                                                    $$ = compoundStmt;
+                                                }
+                | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
+             ;
 
+func-statements: func-statements func-statement OP_SCOLON { 
+                                                            if (!$1) {$$ = Node::add<NodeList>();} 
+                                                            else {$$ = $1;}
+                                                            std::static_pointer_cast<NodeList>($1)->addNode($2);
+                                                            }
+                |                func-statement OP_SCOLON { 
+                                                            $$ = Node::add<NodeList>();
+                                                            std::static_pointer_cast<NodeList>($$)->addNode($1);
+                                                            }
+                ;
 
+func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} ;
 
 if-stmt:   KW_IF OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node::add<ast::IfStatement>($3, $5, nullptr); } // if(a) {}
          | KW_IF OP_LPAREN expression OP_RPAREN compound-stmt KW_ELSE if-stmt { $$ = Node::add<ast::IfStatement>($3, $5, $7); } // if(a) {} else if(b) { s2; }
@@ -137,13 +194,13 @@ while_stmt:   KW_WHILE OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node:
 
 
 let_stmt:   KW_LET iden OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, nullptr, $4); }
-          | KW_LET iden type-annot { $$ = Node::add<ast::LetStatement>($2, nullptr, $3); }
+          | KW_LET iden type-annot { $$ = Node::add<ast::LetStatement>($2, $3, nullptr); }
           | KW_LET iden type-annot OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, $3, $5); }
 
         ;
 
 
-compound-stmt:    OP_LBRACE statements OP_RBRACE { 
+compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE { 
                                                     auto compoundStmt = Node::add<ast::CompoundStatement>();
                                                     auto stmtList = std::dynamic_pointer_cast<NodeList>($2);
                                                     if (stmtList) {
@@ -155,7 +212,8 @@ compound-stmt:    OP_LBRACE statements OP_RBRACE {
              ;
 
 
-expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
+expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
+            | expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
             | expression OP_MULT expression { $$ = Node::add<ast::OpMult>($1, $3); }
             | expression OP_DIVF expression { $$ = Node::add<ast::OpDivF>($1, $3); }
@@ -165,19 +223,24 @@ expression:   expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3)
             | expression OP_SMALLER expression { $$ = Node::add<ast::OpSmaller>($1, $3); }
             | expression OP_BIGGER expression { $$ = Node::add<ast::OpBigger>($1, $3); }
             | OP_LPAREN expression OP_RPAREN { $$ = $2; }
-            | L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); }
-            | iden
+            | OP_MINUS OP_LPAREN expression OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_MINUS, $3); }
+            | OP_PLUS OP_LPAREN expression OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_PLUS, $3); }
+            | signed_int
             ;
-
-
 
 type-annot: OP_COLON iden  {$$ = $2;};
 
 iden: IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); }
  	;
 
+signed_int: integer
+    | OP_PLUS integer { $$ = Node::add<ast::SignedNode>(OP_PLUS, $2); }
+    | OP_MINUS integer { $$ = Node::add<ast::SignedNode>(OP_MINUS, $2); }
+    ;
 
+integer: L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); } ;
 %%
+
 
 int yyerror(const char *s) {
     if (curtoken) {
