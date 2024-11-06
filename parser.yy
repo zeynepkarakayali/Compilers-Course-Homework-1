@@ -62,44 +62,71 @@ extern int yylineno;
 
 %%
 
+program: module {   Node::reset_root();
+                    auto rootList = Node::add<NodeList>(NodeList::WITH_MODULE);
+                    std::static_pointer_cast<NodeList>(rootList)->addNode($1);
+                    Node::current_root() = rootList;
+                };
 
-program: statements { 
-                        Node::reset_root();
-                        Node::current_root() = $1;
-                    };
+module: imports classes functions module_statements  {
+    auto importsList = Node::add<NodeList>(NodeList::WITH_MODULE);
+    std::static_pointer_cast<NodeList>(importsList)->addNode($1);
+                                        
+    auto classesList = Node::add<NodeList>(NodeList::WITH_MODULE);
+    std::static_pointer_cast<NodeList>(classesList)->addNode($2);
 
-statements:   statements statement OP_SCOLON { 
-                                                if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
-                                                else {$$ = $1;}
-                                                std::static_pointer_cast<NodeList>($1)->addNode($2);
-                                           }
-            |            statement OP_SCOLON { 
-                                                  $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
-                                                  std::static_pointer_cast<NodeList>($$)->addNode($1);
-                                             }
-          ;
+    auto functionsList = Node::add<NodeList>(NodeList::WITH_MODULE);
+    std::static_pointer_cast<NodeList>(functionsList)->addNode($3);
 
-statement:   import-stmt { $$ = $1; }  
-           | fun-declaration { $$ = $1; }  
-           | class-declaration { $$ = $1; }  
-           | general_scope_statement { $$ = $1; }  
-           ;
+    auto stmtsList = Node::add<NodeList>(NodeList::WITH_MODULE);
+    std::static_pointer_cast<NodeList>(stmtsList)->addNode($3);
 
+    auto rootList = std::static_pointer_cast<NodeList>(Node::current_root());
+    rootList->addNode(importsList);
+    rootList->addNode(classesList);
+    rootList->addNode(functionsList);
+    rootList->addNode(stmtsList);
+}
 
+imports: imports import-stmt OP_SCOLON {  if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                else {$$ = $1;}
+                                std::static_pointer_cast<NodeList>($1)->addNode($2);
+                             }
+        | import-stmt OP_SCOLON { $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                        std::static_pointer_cast<NodeList>($$)->addNode($1);
+                      }
+        ;
 
+classes: classes class-declaration OP_SCOLON {  if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                else {$$ = $1;}
+                                std::static_pointer_cast<NodeList>($1)->addNode($2);
+                             }
+        | class-declaration OP_SCOLON { $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                        std::static_pointer_cast<NodeList>($$)->addNode($1);
+                      }
+        ;
+
+functions: functions fun-declaration OP_SCOLON {  if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                else {$$ = $1;}
+                                std::static_pointer_cast<NodeList>($1)->addNode($2);
+                             }
+         |           fun-declaration OP_SCOLON { $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                        std::static_pointer_cast<NodeList>($$)->addNode($1);
+                      }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+         ;
         
-general_scope_statements:   general_scope_statements general_scope_statement OP_SCOLON { 
+module_statements: module_statements module_statement OP_SCOLON { 
                                                                                         if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
                                                                                         else {$$ = $1;}
                                                                                         std::static_pointer_cast<NodeList>($1)->addNode($2);
                                                                                         }
-                          |  general_scope_statement OP_SCOLON { 
+                 |                   module_statement OP_SCOLON { 
                                                         $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
                                                         std::static_pointer_cast<NodeList>($$)->addNode($1);
                                                       }
 
 
-general_scope_statement:    while_stmt { $$ = $1; }  
+module_statement:    while_stmt { $$ = $1; }  
                           | let_stmt { $$ = $1; }  
                           | expression { $$ = $1; }  
                           | if-stmt { $$ = $1; } 
@@ -209,7 +236,7 @@ let_stmt:   KW_LET iden OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>
         ;
 
 
-compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE { 
+compound-stmt:    OP_LBRACE module_statements OP_RBRACE { 
                                                     auto compoundStmt = Node::add<ast::CompoundStatement>();
                                                     auto stmtList = std::dynamic_pointer_cast<NodeList>($2);
                                                     if (stmtList) {
