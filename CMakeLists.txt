@@ -127,8 +127,6 @@ add_library(kiraz STATIC
     kiraz/ast/Identifier.h
     kiraz/ast/Identifier.cpp
 
-    kiraz/ast/Literal.h
-    kiraz/ast/Literal.cpp
 
     kiraz/ast/List.h
     kiraz/ast/List.cpp

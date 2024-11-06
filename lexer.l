@@ -20,7 +20,8 @@ extern std::shared_ptr<Token> curtoken;
 
 %%
 
-\"[^"]*\" { colno += yyleng; curtoken = Token::New<String>(std::string(yytext, 1, yyleng - 2)); return L_STRING; }
+\"[^"]*\" {colno += yyleng; curtoken = Token::New<StringLiteral>(std::string(yytext, 1, yyleng - 2)); return STRING_LITERAL; }
+
 [0-9]+ {colno += yyleng; curtoken = Token::New<Integer> (10, yytext); return L_INTEGER; }
 
 
@@ -35,6 +36,7 @@ extern std::shared_ptr<Token> curtoken;
 "<=" {colno += yyleng; curtoken = Token::New<OpLe> (); return OP_LE; } 
 "==" {colno += yyleng; curtoken = Token::New<OpEquals> (); return OP_EQUALS; }
 "=" {colno += yyleng; curtoken = Token::New<OpAssign> (); return OP_ASSIGN; }
+"." {colno += yyleng; curtoken = Token::New<OpDot> (); return OP_DOT; }
 
 ";" {colno += yyleng; curtoken = Token::New<OpScolon> (); return OP_SCOLON; } 
 ":" {colno += yyleng; curtoken = Token::New<OpColon> (); return OP_COLON; } 

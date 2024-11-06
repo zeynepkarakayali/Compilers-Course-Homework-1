@@ -39,15 +39,9 @@ public:
         std::string value = m_str->as_string();
 
         std::string::size_type pos = 0;
-        while ((pos = value.find("\\", pos)) != std::string::npos) {
-            if (pos + 1 < value.size()) {
-                if (value[pos + 1] == 'n') {
-                    value.replace(pos, 2, "\n");
-                } else if (value[pos + 1] == 't') {
-                    value.replace(pos, 2, "\t");
-                }
-            }
-            pos += 1;
+        while ((pos = value.find("\\n", pos)) != std::string::npos) {
+            value.replace(pos, 2, "\n"); 
+            pos += 1; 
         }
         
         return fmt::format("Str({})", value);

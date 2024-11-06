@@ -35,6 +35,10 @@ extern int yylineno;
 %token    OP_ASSIGN
 %token    OP_LPAREN
 %token    OP_RPAREN
+<<<<<<< HEAD
+=======
+%token    OP_DOT
+>>>>>>> ceyda
 
 %token    L_INTEGER
 
@@ -47,7 +51,11 @@ extern int yylineno;
 %token    KW_CLASS
 %token    KW_RETURN
 
+<<<<<<< HEAD
 %token    L_STRING
+=======
+%token    STRING_LITERAL
+>>>>>>> ceyda
 %token    IDENTIFIER
 
 %left      OP_SCOLON
@@ -57,32 +65,88 @@ extern int yylineno;
 %left      OP_LE OP_GE
 %left      OP_PLUS OP_MINUS
 %left      OP_MULT OP_DIVF
-
+%left      OP_DOT
 
 %%
 
+program: module {   Node::reset_root();
+                    auto rootList = Node::add<NodeList>(NodeList::WITH_MODULE);
+                    std::static_pointer_cast<NodeList>(rootList)->addNode($1);
+                    Node::current_root() = rootList;
+                };
 
-program: statements { 
-                        Node::reset_root();
-                        Node::current_root() = $1;
-                    };
+module: imports classes functions module_statements  {
+    auto importsList = Node::add<NodeList>(NodeList::WITH_MODULE);
+    std::static_pointer_cast<NodeList>(importsList)->addNode($1);
+                                        
+    auto classesList = Node::add<NodeList>(NodeList::WITH_MODULE);
+    std::static_pointer_cast<NodeList>(classesList)->addNode($2);
 
-statements:   statements statement OP_SCOLON { 
-                                                if (!$1) {$$ = Node::add<NodeList>();} 
-                                                else {$$ = $1;}
-                                                std::static_pointer_cast<NodeList>($1)->addNode($2);
-                                           }
-            |            statement OP_SCOLON { 
-                                                  $$ = Node::add<NodeList>();
-                                                  std::static_pointer_cast<NodeList>($$)->addNode($1);
-                                             }
-          ;
+    auto functionsList = Node::add<NodeList>(NodeList::WITH_MODULE);
+    std::static_pointer_cast<NodeList>(functionsList)->addNode($3);
 
+<<<<<<< HEAD
 statement:   import-stmt { $$ = $1; }  
            | fun-declaration { $$ = $1; }  
            | class-declaration { $$ = $1; }  
            | general_scope_statement { $$ = $1; }  
            ;
+=======
+    auto stmtsList = Node::add<NodeList>(NodeList::WITH_MODULE);
+    std::static_pointer_cast<NodeList>(stmtsList)->addNode($3);
+
+    auto rootList = std::static_pointer_cast<NodeList>(Node::current_root());
+    rootList->addNode(importsList);
+    rootList->addNode(classesList);
+    rootList->addNode(functionsList);
+    rootList->addNode(stmtsList);
+}
+
+imports: imports import-stmt OP_SCOLON {  if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                else {$$ = $1;}
+                                std::static_pointer_cast<NodeList>($1)->addNode($2);
+                             }
+        | import-stmt OP_SCOLON { $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                        std::static_pointer_cast<NodeList>($$)->addNode($1);
+                      }
+        ;
+
+classes: classes class-declaration OP_SCOLON {  if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                else {$$ = $1;}
+                                std::static_pointer_cast<NodeList>($1)->addNode($2);
+                             }
+        | class-declaration OP_SCOLON { $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                        std::static_pointer_cast<NodeList>($$)->addNode($1);
+                      }
+        ;
+
+functions: functions fun-declaration OP_SCOLON {  if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                else {$$ = $1;}
+                                std::static_pointer_cast<NodeList>($1)->addNode($2);
+                             }
+         |           fun-declaration OP_SCOLON { $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                        std::static_pointer_cast<NodeList>($$)->addNode($1);
+                      }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+         ;
+        
+module_statements: module_statements module_statement OP_SCOLON { 
+                                                                                        if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                                                                        else {$$ = $1;}
+                                                                                        std::static_pointer_cast<NodeList>($1)->addNode($2);
+                                                                                        }
+                 |                   module_statement OP_SCOLON { 
+                                                        $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                                                        std::static_pointer_cast<NodeList>($$)->addNode($1);
+                                                      }
+
+
+module_statement:    while_stmt { $$ = $1; }  
+                          | let_stmt { $$ = $1; }  
+                          | expression { $$ = $1; }  
+                          | if-stmt { $$ = $1; } 
+                          | return-exp { $$ = $1; } 
+                          | call-stmt { $$ = $1;}
+>>>>>>> ceyda
 
 
 
@@ -123,12 +187,20 @@ class-scope : OP_LBRACE class-statements OP_RBRACE {
                 | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
              ;
 class-statements:   class-statements class-statement OP_SCOLON { 
+<<<<<<< HEAD
                                                                 if (!$1) {$$ = Node::add<NodeList>();} 
+=======
+                                                                if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+>>>>>>> ceyda
                                                                 else {$$ = $1;}
                                                                 std::static_pointer_cast<NodeList>($1)->addNode($2);
                                                                 }
                   |                  class-statement OP_SCOLON { 
+<<<<<<< HEAD
                                                                 $$ = Node::add<NodeList>();
+=======
+                                                                $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+>>>>>>> ceyda
                                                                 std::static_pointer_cast<NodeList>($$)->addNode($1);
                                                                 }
                   ;
@@ -166,6 +238,7 @@ arg: iden type-annot  { $$ = Node::add<ast::Argument>($1, $2);}
    ;
 
 func-scope: OP_LBRACE func-statements OP_RBRACE { 
+<<<<<<< HEAD
                                                     auto compoundStmt = Node::add<ast::CompoundStatement>();
                                                     auto stmtList = std::dynamic_pointer_cast<NodeList>($2);
                                                     if (stmtList) {
@@ -207,6 +280,8 @@ let_stmt:   KW_LET iden OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>
 
 
 compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE { 
+=======
+>>>>>>> ceyda
                                                     auto compoundStmt = Node::add<ast::CompoundStatement>();
                                                     auto stmtList = std::dynamic_pointer_cast<NodeList>($2);
                                                     if (stmtList) {
@@ -217,7 +292,66 @@ compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE {
                 | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
              ;
 
+func-statements: func-statements func-statement OP_SCOLON { 
+                                                            if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                                            else {$$ = $1;}
+                                                            std::static_pointer_cast<NodeList>($1)->addNode($2);
+                                                            }
+                |                func-statement OP_SCOLON { 
+                                                            $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                                                            std::static_pointer_cast<NodeList>($$)->addNode($1);
+                                                            }
+                ;
 
+<<<<<<< HEAD
+=======
+func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} ;
+
+return-exp:   KW_RETURN expression {$$ = Node::add<ast::ReturnStatement>($2);};
+            | KW_RETURN call-stmt {$$ = Node::add<ast::ReturnStatement>($2);};
+
+if-stmt:   KW_IF OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node::add<ast::IfStatement>($3, $5, nullptr); } // if(a) {}
+         | KW_IF OP_LPAREN expression OP_RPAREN compound-stmt KW_ELSE if-stmt { $$ = Node::add<ast::IfStatement>($3, $5, $7); } // if(a) {} else if(b) { s2; }
+         | KW_IF OP_LPAREN expression OP_RPAREN compound-stmt KW_ELSE compound-stmt { $$ = Node::add<ast::IfStatement>($3, $5, $7); }; // if(a) {} else { s3; }
+
+
+while_stmt:   KW_WHILE OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node::add<ast::WhileStatement>($3, $5); };
+
+
+let_stmt:   KW_LET iden OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, nullptr, $4); }
+          | KW_LET iden type-annot { $$ = Node::add<ast::LetStatement>($2, $3, nullptr); }
+          | KW_LET iden type-annot OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, $3, $5); }
+
+        ;
+
+
+compound-stmt:    OP_LBRACE module_statements OP_RBRACE { 
+                                                    auto compoundStmt = Node::add<ast::CompoundStatement>();
+                                                    auto stmtList = std::dynamic_pointer_cast<NodeList>($2);
+                                                    if (stmtList) {
+                                                        for (const auto& stmt : stmtList->get_nodes()) { compoundStmt->add_statement(stmt);}
+                                                    } else { yyerror("Failed to cast statements to NodeList in compound statement");}
+                                                    $$ = compoundStmt;
+                                                }
+                | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
+             ;
+call-stmt:  member_expression OP_LPAREN call_arguments OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, $3), "call-stmt";};
+
+
+call_arguments:   call_arguments OP_COMMA expression { 
+                                                                if (!$1) {$$ = Node::add<NodeList>(NodeList::WITHOUT_MODULE);} 
+                                                                else {$$ = $1;}
+                                                                std::static_pointer_cast<NodeList>($1)->addNode($3);
+                                                        }
+
+                | expression                { 
+                                                            $$ = Node::add<NodeList>(NodeList::WITHOUT_MODULE);
+                                                            std::static_pointer_cast<NodeList>($$)->addNode($1);
+                                                            }
+                ;
+
+
+>>>>>>> ceyda
 
 
 
@@ -237,9 +371,19 @@ expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3);
             | signed_int {$$ = $1;}
             | integer {$$ = $1;}
             | iden {$$ = $1;}
+<<<<<<< HEAD
             | L_STRING { $$ = Node::add<ast::String>(curtoken); }
             ;
 
+=======
+            | STRING_LITERAL { $$ = Node::add<ast::StringLiteral>(curtoken); }
+            ;
+
+member_expression: member_expression OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); }
+                 | iden { $$ = $1; }
+                 ;
+
+>>>>>>> ceyda
 type-annot: OP_COLON iden  {$$ = $2;};
 
 iden: IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); }
