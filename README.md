@@ -1,6 +1,6 @@
-# Kiraz Compiler Project - Homework 1
 
-This project implements a **lexer** and a **parser** for the "kiraz" programming language. The primary goal of this homework is to build a compiler that can parse and analyze `.ki` source files or raw code strings.
+Here's how this is supposed to work
+
 
 ## Project Overview
 
@@ -78,6 +78,7 @@ mkdir build
 cd build
 cmake ../hw1 -DCMAKE_VERBOSE_MAKEFILE=1
 make -j`nproc`
+
 ```
 
 For Mac users installed flex w "brew":
@@ -102,29 +103,24 @@ ctest -V
 ctest -R plus.*  # (regex)
 ```
 
-### Run the Compiler
-To parse a `.ki` file and print its parse tree:
+For Mac users installed flex w "brew":
 
-```bash
-./kirazc -f <source_file>.ki
-To parse a Kiraz code string and print its parse tree:
+```
+mkdir build
+cd build
+cmake ../ -D FL_LIBRARY=/opt/homebrew/opt/flex/lib/libfl.a -D FL_INCLUDE_DIR=/opt/homebrew/opt/flex/include -D BISON_EXECUTABLE=/opt/homebrew/opt/bison/bin/bison
+make -j`nproc`
 ```
 
-```bash
-./kirazc -s "source_code_string"
-```
+Once the code compiles, you can use the ``ctest`` command to run the
+test suite. Peruse ``ctest --help`` output for more info
 
-### Error Examples
-```bash
-$ ./kirazc -s ’(’
-** Parser Error at 1:1 at token: OP_LPAREN
+Cheatsheet:
 
-$ ./kirazc -s ’1#2’ # not in alphabet of kiraz
-** Parser Error at 1:2 at token: REJECTED(#)
-
-$ ./kirazc -s ’1+2*3+4)’
-** Parser Error at 1:8 at token: OP_RPAREN
-
-$ ./kirazc -s ’1+2*3+4’ # no error
-Sub(Add(Integer(1),Mult(Integer(2),Integer(3))),Integer(4))
+```shell
+ctest -j`nproc`
+ctest --rerun-failed
+ctest --output-on-failure
+ctest -V
+ctest -R plus.*  # (regex)
 ```
