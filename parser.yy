@@ -296,4 +296,3 @@ int yyerror(const char *s) {
     Node::reset_root();
     return 1;
 }
-
