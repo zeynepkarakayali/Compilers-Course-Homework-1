@@ -47,6 +47,9 @@ extern int yylineno;
 %token    KW_WHILE
 %token    KW_CLASS
 %token    KW_RETURN
+%token    KW_TRUE
+%token    KW_FALSE
+
 
 %token    STRING_LITERAL
 %token    IDENTIFIER
@@ -254,6 +257,7 @@ expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3);
             | signed_int {$$ = $1;}
             | integer {$$ = $1;}
             | iden {$$ = $1;}
+            | boolean {$$ = $1;}
             | STRING_LITERAL { $$ = Node::add<ast::StringLiteral>(curtoken); }
             ;
 
@@ -272,6 +276,9 @@ signed_int:
             ;
 
 integer: L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); } ;
+
+boolean:  KW_TRUE { $$ = Node::add<ast::Boolean>(curtoken); } ;
+        | KW_FALSE { $$ = Node::add<ast::Boolean>(curtoken); } ;
 
 %%
 
