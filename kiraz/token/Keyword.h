@@ -60,6 +60,20 @@ public:
     std::string as_string() const override { return "KW_RETURN"; }
 };
 
+<<<<<<< HEAD
+=======
+class KwTrue : public Keyword {
+public:
+    KwTrue() : Keyword(KW_TRUE) {} 
+    std::string as_string() const override { return "KW_TRUE"; }
+};
+
+class KwFalse : public Keyword {
+public:
+    KwFalse() : Keyword(KW_FALSE) {} 
+    std::string as_string() const override { return "KW_FALSE"; }
+};
+>>>>>>> 12fe52b78e5635357879a883ce98e63821019516
 }
 
 

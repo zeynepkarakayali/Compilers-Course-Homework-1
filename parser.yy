@@ -47,6 +47,23 @@ extern int yylineno;
 %token    KW_WHILE
 %token    KW_CLASS
 %token    KW_RETURN
+<<<<<<< HEAD
+=======
+%token    KW_TRUE
+%token    KW_FALSE
+>>>>>>> 12fe52b78e5635357879a883ce98e63821019516
+
+%token    STRING_LITERAL
+%token    IDENTIFIER
+
+%left      OP_SCOLON
+%right     OP_ASSIGN
+%left      OP_EQUALS
+%left      OP_SMALLER OP_BIGGER
+%left      OP_LE OP_GE
+%left      OP_PLUS OP_MINUS
+%left      OP_MULT OP_DIVF
+%left      OP_DOT
 
 %token    STRING_LITERAL
 %token    IDENTIFIER
@@ -254,6 +271,7 @@ expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3);
             | signed_int {$$ = $1;}
             | integer {$$ = $1;}
             | iden {$$ = $1;}
+            | boolean {$$ = $1;}
             | STRING_LITERAL { $$ = Node::add<ast::StringLiteral>(curtoken); }
             ;
 
@@ -273,6 +291,9 @@ signed_int:
 
 integer: L_INTEGER { $$ = Node::add<ast::Integer>(curtoken); } ;
 
+boolean:  KW_TRUE { $$ = Node::add<ast::Boolean>(curtoken); } ;
+        | KW_FALSE { $$ = Node::add<ast::Boolean>(curtoken); } ;
+
 %%
 
 
@@ -285,8 +306,10 @@ int yyerror(const char *s) {
         fmt::print("** Parser Error at {}:{}, null token\n",
             yylineno, Token::colno);
     }
+
     Token::colno = 0;
     Node::reset_root();
+
     return 1;
 }
 
