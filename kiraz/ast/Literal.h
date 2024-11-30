@@ -50,6 +50,18 @@ private:
     Token::Ptr m_str; 
 };
 
+class Boolean : public Node {
+public:
+    Boolean(Token::Ptr bl) : Node(), m_bool(bl) {}
+
+    std::string as_string() const override {
+        
+        return fmt::format("Bool({})", m_bool->as_string());
+    }
+
+private:
+    Token::Ptr m_bool; 
+};
 
 }
 
