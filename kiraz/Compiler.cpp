@@ -136,27 +136,28 @@ int Compiler::compile(Node::Ptr root, std::ostream &ostr) {
 
     fmt::print("All the built-ins are inserted\n");
 
-    // Assuming root is a shared_ptr<Node> instead of a shared_ptr<const Node>
+    
+/*
     auto modulePtr = std::dynamic_pointer_cast<ast::Module>(root);
     if (modulePtr) {
-        // get_m_statements() fonksiyonu std::shared_ptr<const Node> döndürüyor
         auto nodePtr = modulePtr->get_m_statements();
         
-        // const Node* türündeki nodePtr'yi const NodeList* türüne dönüştürmek
         auto nodeListPtr = std::dynamic_pointer_cast<const NodeList>(nodePtr);
 
         if (nodeListPtr) {
             for (const auto& node : nodeListPtr->get_nodes()) {
                 fmt::print("{}\n", node->as_string());
+
             }
         }
     }
-
+*/
 
 
     st.print_symbols();
 
     if (auto ret = root->compute_stmt_type(st)) {
+        fmt::print("\na\n");
         set_error(fmt::format(
                 "Error at {}:{}: {}\n", ret->get_line(), ret->get_col(), ret->get_error()));
         Node::reset_root();
