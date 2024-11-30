@@ -1,3 +1,5 @@
+#ifndef COMPILER_H
+#define COMPILER_H
 
 #include <cassert>
 #include <map>
@@ -144,3 +146,4 @@ private:
     std::string m_error;
     static Compiler *s_current;
 };
+#endif // COMPILER_H

@@ -7,6 +7,7 @@
 #include <kiraz/ast/Identifier.h>
 #include <kiraz/ast/Statement.h>
 #include <kiraz/ast/List.h>
+#include <kiraz/ast/Module.h>
 #include <kiraz/NodeList.h>
 
 #include <kiraz/token/Literal.h>
@@ -65,19 +66,20 @@ extern int yylineno;
 
 %%
 
+program: module {
+                    Node::reset_root();
+                    Node::current_root() = $1;
+                }
 
-program: statements { 
-                        Node::reset_root();
-                        Node::current_root() = $1;
-                    };
+module: statements {   $$ = Node::add<ast::Module>($1);};
 
 statements:   statements statement OP_SCOLON { 
-                                                if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                                if (!$1) {$$ = Node::add<NodeList>();} 
                                                 else {$$ = $1;}
                                                 std::static_pointer_cast<NodeList>($1)->addNode($2);
                                            }
             |            statement OP_SCOLON { 
-                                                  $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                                                  $$ = Node::add<NodeList>();
                                                   std::static_pointer_cast<NodeList>($$)->addNode($1);
                                              }
           ;
@@ -92,12 +94,12 @@ statement:   import-stmt { $$ = $1; }
 
         
 general_scope_statements:   general_scope_statements general_scope_statement OP_SCOLON { 
-                                                                                        if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                                                                        if (!$1) {$$ = Node::add<NodeList>();} 
                                                                                         else {$$ = $1;}
                                                                                         std::static_pointer_cast<NodeList>($1)->addNode($2);
                                                                                         }
                           |  general_scope_statement OP_SCOLON { 
-                                                        $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                                                        $$ = Node::add<NodeList>();
                                                         std::static_pointer_cast<NodeList>($$)->addNode($1);
                                                       }
 
@@ -128,12 +130,12 @@ class-scope : OP_LBRACE class-statements OP_RBRACE {
                 | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
              ;
 class-statements:   class-statements class-statement OP_SCOLON { 
-                                                                if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                                                if (!$1) {$$ = Node::add<NodeList>();} 
                                                                 else {$$ = $1;}
                                                                 std::static_pointer_cast<NodeList>($1)->addNode($2);
                                                                 }
                   |                  class-statement OP_SCOLON { 
-                                                                $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                                                                $$ = Node::add<NodeList>();
                                                                 std::static_pointer_cast<NodeList>($$)->addNode($1);
                                                                 }
                   ;
@@ -182,12 +184,12 @@ func-scope: OP_LBRACE func-statements OP_RBRACE {
              ;
 
 func-statements: func-statements func-statement OP_SCOLON { 
-                                                            if (!$1) {$$ = Node::add<NodeList>(NodeList::WITH_MODULE);} 
+                                                            if (!$1) {$$ = Node::add<NodeList>();} 
                                                             else {$$ = $1;}
                                                             std::static_pointer_cast<NodeList>($1)->addNode($2);
                                                             }
                 |                func-statement OP_SCOLON { 
-                                                            $$ = Node::add<NodeList>(NodeList::WITH_MODULE);
+                                                            $$ = Node::add<NodeList>();
                                                             std::static_pointer_cast<NodeList>($$)->addNode($1);
                                                             }
                 ;
@@ -226,13 +228,13 @@ call-stmt:  member_expression OP_LPAREN call_arguments OP_RPAREN {$$ = Node::add
 
 
 call_arguments:   call_arguments OP_COMMA expression { 
-                                                                if (!$1) {$$ = Node::add<NodeList>(NodeList::WITHOUT_MODULE);} 
+                                                                if (!$1) {$$ = Node::add<NodeList>();} 
                                                                 else {$$ = $1;}
                                                                 std::static_pointer_cast<NodeList>($1)->addNode($3);
                                                         }
 
                 | expression                { 
-                                                            $$ = Node::add<NodeList>(NodeList::WITHOUT_MODULE);
+                                                            $$ = Node::add<NodeList>();
                                                             std::static_pointer_cast<NodeList>($$)->addNode($1);
                                                             }
                 ;

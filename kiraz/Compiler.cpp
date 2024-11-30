@@ -7,7 +7,10 @@
 #include <kiraz/ast/Identifier.h>
 #include <kiraz/ast/List.h>
 #include <kiraz/token/Identifier.h>
+#include <kiraz/ast/Module.h>
+#include <kiraz/NodeList.h>
 #include <resource/FILE_io_ki.h>
+
 
 Node::Ptr SymbolTable::s_module_ki;
 Node::Ptr SymbolTable::s_module_io;
@@ -88,8 +91,8 @@ void add_builtin_identifiers(SymbolTable st){
     }
 
 }
-//Node::Cptr iden, Node::Cptr type, Node::Cptr scope, Node::Cptr args=nullptr
-// std::make_shared<ast::Identifier>(Token::New<token::Identifier>(type))
+
+
 ast::FuncStatement::Ptr add_function_type1(std::string name, std::string return_type, std::string left_arg_type, std::string right_arg_type){
     auto arg_list = std::make_shared<ast::ArgList>();
     arg_list->add_argument(std::make_shared<ast::Argument>(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("l")), std::make_shared<ast::Identifier>(Token::New<token::Identifier>(left_arg_type))));
@@ -126,11 +129,31 @@ int Compiler::compile(Node::Ptr root, std::ostream &ostr) {
     SymbolTable st(ScopeType::Module);
 
     add_builtin_identifiers(st);
+    
     st.add_symbol("and", add_function_type1("and", "Boolean", "Boolean", "Boolean"));
     st.add_symbol("or", add_function_type1("or", "Boolean", "Boolean", "Boolean"));
     st.add_symbol("xor", add_function_type2("xor", "Boolean", "Boolean"));
 
     fmt::print("All the built-ins are inserted\n");
+
+    // Assuming root is a shared_ptr<Node> instead of a shared_ptr<const Node>
+    auto modulePtr = std::dynamic_pointer_cast<ast::Module>(root);
+    if (modulePtr) {
+        // get_m_statements() fonksiyonu std::shared_ptr<const Node> döndürüyor
+        auto nodePtr = modulePtr->get_m_statements();
+        
+        // const Node* türündeki nodePtr'yi const NodeList* türüne dönüştürmek
+        auto nodeListPtr = std::dynamic_pointer_cast<const NodeList>(nodePtr);
+
+        if (nodeListPtr) {
+            for (const auto& node : nodeListPtr->get_nodes()) {
+                fmt::print("{}\n", node->as_string());
+            }
+        }
+    }
+
+
+
     st.print_symbols();
 
     if (auto ret = root->compute_stmt_type(st)) {
