@@ -7,10 +7,10 @@ Token::Ptr curtoken;
 
 Node::~Node() {}
 
-Node::Ptr Node::compute_stmt_type(SymbolTable &st) {
+Node::Ptr Node::compute_stmt_type(SymbolTable &st)  {
     set_cur_symtab(st.get_cur_symtab());
     return nullptr;
-}
+} // we don't change here                                                           
 
 Node::Ptr Node::add_to_symtab_forward(SymbolTable &st) {
     return nullptr;

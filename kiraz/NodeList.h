@@ -8,36 +8,29 @@
 
 class NodeList : public Node {
 public:
-    using NodePtr = std::shared_ptr<Node>;
+    //using NodePtr = std::shared_ptr<Node>;
 
-    enum Mode {
-        WITH_MODULE,
-        WITHOUT_MODULE
-    };
 
-    explicit NodeList(Mode mode = WITH_MODULE) : Node(), mode(mode) {}
+    explicit NodeList() : Node() {}
 
     ~NodeList() override = default;
 
-    void addNode(const NodePtr& node) {
+    void addNode(const Node::Ptr& node) {
         nodeQueue.push(node);
     }
 
     std::string as_string() const override {
+
         std::string result= "";
-        if (mode == WITH_MODULE) {
-            result += "Module([";
-        } 
-        std::queue<NodePtr> tempQueue = nodeQueue; 
+
+        std::queue<Node::Ptr> tempQueue = nodeQueue; 
 
         while (!tempQueue.empty()) {
             result += tempQueue.front()->as_string() + ", "; 
             tempQueue.pop();
         }
         result.resize(result.size() - 2);
-        if (mode == WITH_MODULE) {
-            result += "])";
-        }
+
         return result;
     }
 
@@ -54,22 +47,19 @@ public:
         return nodeQueue.size();
     }
 
-    std::vector<NodePtr> get_nodes() const {
-        std::vector<NodePtr> nodes;
-        std::queue<NodePtr> tempQueue = nodeQueue;
+    std::vector<Node::Ptr> get_nodes() const {
+        std::vector<Node::Ptr> nodes;
+        std::queue<Node::Ptr> tempQueue = nodeQueue;
         while (!tempQueue.empty()) {
             nodes.push_back(tempQueue.front());
             tempQueue.pop();
         }
         return nodes;
     }
-    void setMode(Mode newMode) {
-        mode = newMode;
-    }
+
 
 private:
-    std::queue<NodePtr> nodeQueue;
-    Mode mode;
+    std::queue<Node::Ptr> nodeQueue;
 };
 
 #endif // KIRAZ_NODELIST_H

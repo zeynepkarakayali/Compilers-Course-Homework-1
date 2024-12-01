@@ -1,7 +1,7 @@
 #ifndef KIRAZ_AST_STATEMENT_H
 #define KIRAZ_AST_STATEMENT_H
 #include <kiraz/Node.h>
-
+#include "kiraz/Compiler.h"
 
 namespace ast {
 
@@ -59,6 +59,28 @@ class FuncStatement : public Node{
                                                                                m_type->as_string(),  m_scope->as_string()); }
         }
 
+        virtual SymTabEntry get_symbol (const SymbolTable &st) const override{
+            auto name = m_iden->as_string();
+            auto entry = st.get_cur_symtab()->get_symbol(name);
+            
+            if (entry) {
+                fmt::print("Error: Variable '{}' is not declared in this scope.\n", name);
+                return {};
+            }
+            return entry;
+        }
+
+
+        virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override {
+            if(get_symbol(st)){
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+            }
+            st.add_symbol(m_iden->as_string(), shared_from_this());
+            return nullptr;
+        }
+
+
+
     private:
        Node::Cptr m_iden;
        Node::Cptr m_args;
@@ -66,18 +88,43 @@ class FuncStatement : public Node{
        Node::Cptr m_scope;
 };
 
+
+
+
 class ClassStatement : public Node{
     public:
         ClassStatement(Node::Cptr iden, Node::Cptr scope) : Node(), m_iden(iden), m_scope(scope) {    
-        if (!iden ) {
-            throw std::runtime_error("FuncStatement constructor received a nullptr iden");
+            if (!iden ) {
+                throw std::runtime_error("FuncStatement constructor received a nullptr iden");
+            }
+            if(!scope){
+                throw std::runtime_error("FuncStatement constructor received a nullptr scope");
+            }
         }
-        if(!scope){
-            throw std::runtime_error("FuncStatement constructor received a nullptr scope");
+        std::string as_string() const override  {return fmt::format("Class(n={}, s={})", m_iden->as_string(),  m_scope->as_string()); }
+
+
+        virtual SymTabEntry get_symbol (const SymbolTable &st) const override{
+            auto name = m_iden->as_string();
+            auto entry = st.get_cur_symtab()->get_symbol(name);
+            
+            if (entry) {
+                fmt::print("Error: Variable '{}' is not declared in this scope.\n", name);
+                return {};
+            }
+
+            return entry;
         }
-    }
-        std::string as_string() const override 
-        {return fmt::format("Class(n={}, s={})", m_iden->as_string(),  m_scope->as_string()); }
+
+
+        virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override{
+            if(get_symbol(st)){
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+            }
+            st.add_symbol(m_iden->as_string(), shared_from_this());
+            return nullptr;
+        }
+        
 
     private:
        Node::Cptr m_iden;
@@ -121,6 +168,27 @@ class LetStatement : public Node{
 
         } 
 
+
+        virtual SymTabEntry get_symbol (const SymbolTable &st) const override{
+            auto name = m_iden->as_string();
+            auto entry = st.get_cur_symtab()->get_symbol(name);
+            
+            if (entry) {
+                fmt::print("Error: Variable '{}' is not declared in this scope.\n", name);
+                return {};
+            }
+
+            return entry;
+        }
+
+
+        virtual Node::Ptr add_to_symtab_ordered(SymbolTable &st) override{
+            if(get_symbol(st)){
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+            }
+            st.add_symbol(m_iden->as_string(), shared_from_this());
+            return nullptr;
+        }
     private:
        Node::Cptr m_iden;
        Node::Cptr m_type;
