@@ -1,7 +1,8 @@
 #ifndef KIRAZ_AST_STATEMENT_H
 #define KIRAZ_AST_STATEMENT_H
 #include <kiraz/Node.h>
-#include "kiraz/Compiler.h"
+#include <kiraz/Compiler.h>
+#include <kiraz/NodeList.h>
 
 namespace ast {
 
@@ -124,11 +125,14 @@ class ClassStatement : public Node{
             st.add_symbol(m_iden->as_string(), shared_from_this());
             return nullptr;
         }
+
+    Node::Ptr compute_stmt_type(SymbolTable &st) override;
         
 
     private:
        Node::Cptr m_iden;
        Node::Cptr m_scope;
+       std::shared_ptr<SymbolTable> c_symtab;
 };
 
 class ImportStatement : public Node{
