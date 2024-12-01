@@ -108,7 +108,9 @@ public:
      *                    Used during type checking phase.
      * @return The statement pointer if found in the given symtab, otherwise nullptr
      */
-    virtual SymTabEntry get_symbol(const SymbolTable &) const { return {}; }
+    virtual SymTabEntry get_symbol(const SymbolTable &) const { fmt::print("\nbbb\n");return {}; }
+
+
 
     /**
      * @brief get_symbol: Get the statement referred by the current statement in own symtab.
@@ -116,6 +118,8 @@ public:
      * @return The statement pointer if found in the given symtab, otherwise nullptr
      */
     virtual SymTabEntry get_symbol() const { return {}; }
+
+
 
     /**
      * @brief get_subsymbol: Get the statement referred by the current statement in the symtab of

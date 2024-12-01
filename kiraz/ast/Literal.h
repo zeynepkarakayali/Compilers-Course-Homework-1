@@ -2,6 +2,9 @@
 #define KIRAZ_AST_LITERAL_H
 
 #include <kiraz/Node.h>
+#include <kiraz/ast/Identifier.h>
+#include <kiraz/token/Identifier.h>
+
 
 namespace ast {
 class Integer : public Node {
@@ -32,7 +35,10 @@ private:
 
 class StringLiteral : public Node {
 public:
-    StringLiteral(Token::Ptr str) : Node(), m_str(str) {}
+    StringLiteral(Token::Ptr str) : Node(), m_str(str) {
+        StringLiteral::set_stmt_type(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("String")));
+
+    }
 
     std::string as_string() const override {
         std::string value = m_str->as_string();

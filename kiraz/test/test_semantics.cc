@@ -439,4 +439,8 @@ TEST_F(CompilerFixture, func_call_type_mismatch) {
             " which does not match definition type 'String'");
 }
 
+TEST_F(CompilerFixture, mine) {
+    verify_ok("let a = 5; class C { let i = 0; }; func f() : Void { let c=5;};");
+}
+
 } // namespace kiraz

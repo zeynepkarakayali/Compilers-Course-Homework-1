@@ -20,7 +20,7 @@ namespace ast {
 
         Node::Ptr compute_stmt_type(SymbolTable &st) override {
             assert(m_statements);
-            set_cur_symtab(st.get_cur_symtab());
+            if(auto ret = Node::compute_stmt_type(st)){ return ret;}
             auto scope = st.enter_scope(ScopeType::Module, shared_from_this());
 
             for(const auto &stmt : static_cast<const NodeList &>(*m_statements).get_nodes()){

@@ -157,7 +157,7 @@ int Compiler::compile(Node::Ptr root, std::ostream &ostr) {
     st.print_symbols();
 
     if (auto ret = root->compute_stmt_type(st)) {
-        fmt::print("\na\n");
+        fmt::print("here");
         set_error(fmt::format(
                 "Error at {}:{}: {}\n", ret->get_line(), ret->get_col(), ret->get_error()));
         Node::reset_root();

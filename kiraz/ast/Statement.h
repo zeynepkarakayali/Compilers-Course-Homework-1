@@ -2,6 +2,7 @@
 #define KIRAZ_AST_STATEMENT_H
 #include <kiraz/Node.h>
 #include "kiraz/Compiler.h"
+#include <kiraz/ast/Identifier.h>
 
 namespace ast {
 
@@ -59,25 +60,27 @@ class FuncStatement : public Node{
                                                                                m_type->as_string(),  m_scope->as_string()); }
         }
 
-        virtual SymTabEntry get_symbol (const SymbolTable &st) const override{
-            auto name = m_iden->as_string();
-            auto entry = st.get_cur_symtab()->get_symbol(name);
-            
-            if (entry) {
-                fmt::print("Error: Variable '{}' is not declared in this scope.\n", name);
-                return {};
-            }
-            return entry;
-        }
+
 
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override {
-            if(get_symbol(st)){
+            if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
             }
             st.add_symbol(m_iden->as_string(), shared_from_this());
             return nullptr;
         }
+
+        Node::Ptr compute_stmt_type(SymbolTable &st) override {
+            if(auto ret = Node::compute_stmt_type(st)){ return ret;}
+
+            if (auto ret_type = m_type->get_symbol(st)){
+                //return set_error(FF("Return type '{}' of function '{}' is not found", m_type.name, m_iden.name));
+            }
+            return nullptr;
+
+        }
+
 
 
 
@@ -118,7 +121,7 @@ class ClassStatement : public Node{
 
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override{
-            if(get_symbol(st)){
+            if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
             }
             st.add_symbol(m_iden->as_string(), shared_from_this());
@@ -169,24 +172,21 @@ class LetStatement : public Node{
         } 
 
 
-        virtual SymTabEntry get_symbol (const SymbolTable &st) const override{
-            auto name = m_iden->as_string();
-            auto entry = st.get_cur_symtab()->get_symbol(name);
-            
-            if (entry) {
-                fmt::print("Error: Variable '{}' is not declared in this scope.\n", name);
-                return {};
-            }
-
-            return entry;
-        }
-
 
         virtual Node::Ptr add_to_symtab_ordered(SymbolTable &st) override{
-            if(get_symbol(st)){
+            auto type = m_stmt->get_stmt_type();
+            if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
             }
-            st.add_symbol(m_iden->as_string(), shared_from_this());
+            
+            if(m_stmt && m_type){
+
+                if(type->as_string() != m_type->as_string()) {
+                    return set_error(fmt::format("Left type '{}' of assignment does not match the right type '{}'\n", std::const_pointer_cast<Node>(type)->as_string(), m_type->as_string()));
+                }
+            }
+            
+            st.add_symbol(m_iden->as_string(), std::const_pointer_cast<Node>(type));
             return nullptr;
         }
     private:
