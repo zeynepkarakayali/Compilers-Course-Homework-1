@@ -229,6 +229,11 @@ class LetStatement : public Node{
 
 
         virtual Node::Ptr add_to_symtab_ordered(SymbolTable &st) override{
+
+            if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+            }
+
             Node::Cptr type = nullptr;
 
             if(m_type && !m_stmt){ 
@@ -247,12 +252,7 @@ class LetStatement : public Node{
                 
             }
 
-            
 
-
-            if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
-                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
-            }
             
             if(m_stmt && m_type){
 
@@ -267,6 +267,12 @@ class LetStatement : public Node{
 
         Node::Ptr compute_stmt_type(SymbolTable &st) override {
             if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+
+            auto iden_entry = m_iden->get_symbol(st);
+            if(!iden_entry.first_letter_lowercase()){
+                return set_error(fmt::format("Variable name '{}' can not start with an uppercase letter", iden_entry.name));
+            }
+
             if(m_stmt){
                 auto stmt_type =  m_stmt->get_stmt_type();
                 if(!stmt_type){ 
@@ -356,6 +362,45 @@ private:
     Node::Cptr m_exp;      
     Node::Cptr m_args;          
 };
+
+
+class AndLogicFunc : public Node {
+public:
+    AndLogicFunc(Node::Cptr left, Node::Cptr right) : Node(), m_left(left) , m_right(right){ }
+    std::string as_string() const override { 
+         return fmt::format("And(l={}, r={})", m_left->as_string(), m_right->as_string()); 
+    }
+
+private:
+    Node::Cptr m_left;      
+    Node::Cptr m_right;          
+};
+
+
+class OrLogicFunc : public Node {
+public:
+    OrLogicFunc(Node::Cptr left, Node::Cptr right) : Node(), m_left(left) , m_right(right){ }
+    std::string as_string() const override { 
+         return fmt::format("Or(l={}, r={})", m_left->as_string(), m_right->as_string()); 
+    }
+
+private:
+    Node::Cptr m_left;      
+    Node::Cptr m_right;          
+};
+
+class NotLogicFunc : public Node {
+public:
+    NotLogicFunc(Node::Cptr value) : Node(), m_value(value){ }
+    std::string as_string() const override { 
+         return fmt::format("Xor(l={})", m_value->as_string()); 
+    }
+
+private:
+    Node::Cptr m_value;      
+};
+
+
 }
 
 

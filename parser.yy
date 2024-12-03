@@ -50,6 +50,9 @@ extern int yylineno;
 %token    KW_RETURN
 %token    KW_TRUE
 %token    KW_FALSE
+%token    KW_AND
+%token    KW_OR
+%token    KW_NOT
 
 
 %token    STRING_LITERAL
@@ -194,7 +197,7 @@ func-statements: func-statements func-statement OP_SCOLON {
                                                             }
                 ;
 
-func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} ;
+func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} | call-stmt{$$=$1;};
 
 return-exp:   KW_RETURN expression {$$ = Node::add<ast::ReturnStatement>($2);};
             | KW_RETURN call-stmt {$$ = Node::add<ast::ReturnStatement>($2);};
@@ -210,9 +213,9 @@ while_stmt:   KW_WHILE OP_LPAREN expression OP_RPAREN compound-stmt { $$ = Node:
 let_stmt:   KW_LET iden OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, nullptr, $4); }
           | KW_LET iden type-annot { $$ = Node::add<ast::LetStatement>($2, $3, nullptr); }
           | KW_LET iden type-annot OP_ASSIGN expression { $$ = Node::add<ast::LetStatement>($2, $3, $5); }
-
+          | KW_LET iden type-annot OP_ASSIGN call-stmt { $$ = Node::add<ast::LetStatement>($2, $3, $5); }
+          | KW_LET iden OP_ASSIGN call-stmt { $$ = Node::add<ast::LetStatement>($2, nullptr, $4); }
         ;
-
 
 compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE { 
                                                     auto compoundStmt = Node::add<ast::CompoundStatement>();
@@ -224,7 +227,9 @@ compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE {
                                                 }
                 | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
              ;
-call-stmt:  member_expression OP_LPAREN call_arguments OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, $3), "call-stmt";};
+call-stmt:  member_expression OP_LPAREN call_arguments OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, $3);}
+            | member_expression OP_LPAREN OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, nullptr);};
+            ;
 
 
 call_arguments:   call_arguments OP_COMMA expression { 
@@ -240,10 +245,15 @@ call_arguments:   call_arguments OP_COMMA expression {
                 ;
 
 
+expression:   KW_AND OP_LPAREN boolean OP_COMMA boolean OP_RPAREN  { $$ = Node::add<ast::AndLogicFunc>($3, $5); }
+            | KW_OR OP_LPAREN boolean OP_COMMA boolean OP_RPAREN  { $$ = Node::add<ast::OrLogicFunc>($3, $5); }
+            | KW_NOT OP_LPAREN boolean OP_RPAREN  { $$ = Node::add<ast::NotLogicFunc>($3); }
+            | expressions {$$ = $1;}
+            ;
 
 
-
-expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
+expressions:   keyword OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
+            |  iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
             | expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
             | expression OP_MULT expression { $$ = Node::add<ast::OpMult>($1, $3); }
@@ -260,8 +270,11 @@ expression:   iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3);
             | integer {$$ = $1;}
             | iden {$$ = $1;}
             | boolean {$$ = $1;}
+            | keyword
             | STRING_LITERAL { $$ = Node::add<ast::StringLiteral>(curtoken); }
             ;
+
+
 
 member_expression: member_expression OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); }
                  | iden { $$ = $1; }
@@ -269,7 +282,12 @@ member_expression: member_expression OP_DOT iden { $$ = Node::add<ast::OpDot>($1
 
 type-annot: OP_COLON iden  {$$ = $2;};
 
-iden: IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); std::dynamic_pointer_cast<ast::Identifier>($$)->initialize_stmt_type();}
+keyword:     KW_AND { $$ = Node::add<ast::Keyword>(curtoken);}
+          |  KW_OR { $$ = Node::add<ast::Keyword>(curtoken);}
+          |  KW_NOT { $$ = Node::add<ast::Keyword>(curtoken);}
+          ;
+
+iden:    IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); std::dynamic_pointer_cast<ast::Identifier>($$)->initialize_stmt_type();}
  	;
 
 signed_int: 

@@ -132,7 +132,7 @@ int Compiler::compile(Node::Ptr root, std::ostream &ostr) {
     
     st.add_symbol("and", add_function_type1("and", "Boolean", "Boolean", "Boolean"));
     st.add_symbol("or", add_function_type1("or", "Boolean", "Boolean", "Boolean"));
-    st.add_symbol("xor", add_function_type2("xor", "Boolean", "Boolean"));
+    st.add_symbol("not", add_function_type2("not", "Boolean", "Boolean"));
 
     fmt::print("All the built-ins are inserted\n");
 
