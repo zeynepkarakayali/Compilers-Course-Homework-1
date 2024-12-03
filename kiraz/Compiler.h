@@ -109,6 +109,7 @@ public:
             fmt::print("\n");
         }
 
+        // subscope'lar icin
         for (const auto& subscope : scope->subscopes) {
             print_symbols(subscope, level + 1);
         }

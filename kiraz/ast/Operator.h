@@ -155,4 +155,3 @@ public:
 }
 #endif // KIRAZ_AST_OPERATOR_H
 
-
