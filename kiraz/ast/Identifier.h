@@ -32,6 +32,19 @@ class Identifier : public Node {
         Token::Ptr m_id;
         
 };
+
+
+class KwTrue : public Node {
+public:
+    KwTrue() : Node() {} 
+    std::string as_string() const override { return "true"; }
+};
+
+class KwFalse : public Node {
+public:
+    KwFalse() : Node() {} 
+    std::string as_string() const override { return "false"; }
+};
 }
 
 

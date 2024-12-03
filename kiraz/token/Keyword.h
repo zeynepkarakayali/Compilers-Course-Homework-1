@@ -71,6 +71,26 @@ public:
     KwFalse() : Keyword(KW_FALSE) {} 
     std::string as_string() const override { return "KW_FALSE"; }
 };
+
+class KwAnd : public Keyword {
+public:
+    KwAnd() : Keyword(KW_AND) {} 
+    std::string as_string() const override { return "KW_AND"; }
+};
+
+class KwOr : public Keyword {
+public:
+    KwOr() : Keyword(KW_OR) {} 
+    std::string as_string() const override { return "KW_OR"; }
+};
+
+class KwNot : public Keyword {
+public:
+    KwNot() : Keyword(KW_NOT) {} 
+    std::string as_string() const override { return "KW_NOT"; }
+};
+
+
 }
 
 

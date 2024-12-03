@@ -70,6 +70,19 @@ private:
     Token::Ptr m_bool; 
 };
 
+class Keyword : public Node {
+public:
+    Keyword(Token::Ptr kw) : Node(), m_kw(kw) {}
+
+    std::string as_string() const override {
+        
+        return fmt::format("{}", m_kw->as_string());
+    }
+
+private:
+    Token::Ptr m_kw; 
+};
+
 }
 
 #endif
