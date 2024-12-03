@@ -28,19 +28,24 @@ namespace ast {
                 if(auto ret = stmt->add_to_symtab_forward(st)){
                     return ret;
                 }
+
+            }
+
+            for(const auto &stmt : static_cast<const NodeList &>(*m_statements).get_nodes()){
                 if(auto ret = stmt->add_to_symtab_ordered(st)){
                     return ret;
                 }
-
                 if(const auto ret = stmt->compute_stmt_type(st)){
                     return ret;
                 }
+
                 /*
                 if(auto ret = stmt->add_to_symtab_forward(*m_symtab)){
                     return ret;
                 }*/
             }
             st.print_symbols();
+
 
             return nullptr;
 

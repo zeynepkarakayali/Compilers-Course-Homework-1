@@ -52,6 +52,7 @@ public:
         return fmt::format("Str({})", value);
     }
 
+
 private:
     Token::Ptr m_str; 
 };

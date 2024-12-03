@@ -3,6 +3,10 @@
 #include <kiraz/Node.h>
 #include "kiraz/Compiler.h"
 #include <kiraz/ast/Identifier.h>
+#include <kiraz/NodeList.h>
+#include <kiraz/ast/Operator.h>
+#include <kiraz/ast/List.h>
+
 
 namespace ast {
 
@@ -64,19 +68,67 @@ class FuncStatement : public Node{
 
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override {
+
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
-                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
-            st.add_symbol(m_iden->as_string(), shared_from_this());
+
+            st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
         }
 
-        Node::Ptr compute_stmt_type(SymbolTable &st) override {
-            if(auto ret = Node::compute_stmt_type(st)){ return ret;}
 
-            if (auto ret_type = m_type->get_symbol(st)){
-                //return set_error(FF("Return type '{}' of function '{}' is not found", m_type.name, m_iden.name));
+        Node::Ptr compute_stmt_type(SymbolTable &st) override {
+            if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+
+
+            auto ret_type = m_type->get_symbol(st); 
+            if (!ret_type){
+                return set_error(FF("Return type '{}' of function '{}' is not found", ret_type.name, m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
+
+
+            auto scope = st.enter_scope(ScopeType::Func, shared_from_this());
+
+            if(m_args){
+                for(const auto &stmt : dynamic_cast<const ArgList&>(*m_args).get_arguments()){
+                    auto stmt_name = stmt->get_name();
+                    auto stmt_type = stmt->get_type();
+                    if(auto s_stmt = std::const_pointer_cast<Node>(stmt_name)->get_symbol(st)){
+
+                        return set_error(FF("Identifier '{}' in argument list of function '{}' is already in symtab", s_stmt.name, m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
+                    }
+                    auto s_stmt_type = std::const_pointer_cast<Node>(stmt_type)->get_symbol(st);
+                    if(!s_stmt_type){
+
+                        return set_error(fmt::format("Identifier '{}' in type of argument '{}' in function '{}' is not found", stmt_type->as_string().substr(3, stmt_type->as_string().size() - 4), 
+                                                                                                                                stmt_name->as_string().substr(3, stmt_name->as_string().size() - 4), 
+                                                                                                                                m_iden->as_string().substr(3, m_iden->as_string().size() - 4)
+                                                                                                                                ));
+                    }
+
+                    st.add_symbol(stmt_name->as_string().substr(3, m_iden->as_string().size() - 4), stmt_type);
+
+                }
+            }
+
+
+            if( m_scope){
+                for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+                    fmt::print("\n{}\n", stmt->as_string());
+                    if(const auto ret = stmt->compute_stmt_type(st)){
+                        return ret;
+                    }
+                    if(auto ret = stmt->add_to_symtab_ordered(st)){
+                        return ret;
+                    }
+
+                }
+
+            }
+
+            
+            st.print_symbols();
             return nullptr;
 
         }
@@ -124,7 +176,7 @@ class ClassStatement : public Node{
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
             }
-            st.add_symbol(m_iden->as_string(), shared_from_this());
+            st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
         }
         
@@ -149,7 +201,7 @@ class ImportStatement : public Node{
 
 class LetStatement : public Node{
     public:
-        LetStatement(Node::Cptr iden, Node::Cptr type=nullptr, Node::Cptr stmt=nullptr) : Node(), m_iden(iden), m_type(type), m_stmt(stmt) { 
+        LetStatement(Node::Ptr iden, Node::Ptr type=nullptr, Node::Ptr stmt=nullptr) : Node(), m_iden(iden), m_type(type), m_stmt(stmt) { 
         if (!iden ) {
             throw std::runtime_error("FuncStatement constructor received a nullptr iden");
         }
@@ -174,7 +226,27 @@ class LetStatement : public Node{
 
 
         virtual Node::Ptr add_to_symtab_ordered(SymbolTable &st) override{
-            auto type = m_stmt->get_stmt_type();
+            Node::Cptr type = nullptr;
+
+            if(m_type && !m_stmt){ 
+
+                type = std::dynamic_pointer_cast<const Node>(m_type);
+
+            }
+
+            if(m_stmt && !m_type){ 
+
+                auto stmt_type =  m_stmt->get_stmt_type();
+                if(stmt_type) {
+                    type = stmt_type;
+                    fmt::print("let type: {}", type->as_string());
+                }
+                
+            }
+
+            
+
+
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
             }
@@ -185,14 +257,29 @@ class LetStatement : public Node{
                     return set_error(fmt::format("Left type '{}' of assignment does not match the right type '{}'\n", std::const_pointer_cast<Node>(type)->as_string(), m_type->as_string()));
                 }
             }
-            
-            st.add_symbol(m_iden->as_string(), std::const_pointer_cast<Node>(type));
+            st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), std::const_pointer_cast<Node>(type));
+
             return nullptr;
         }
+
+        Node::Ptr compute_stmt_type(SymbolTable &st) override {
+            if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+            if(m_stmt){
+                auto stmt_type =  m_stmt->get_stmt_type();
+                if(!stmt_type){ 
+                    return m_stmt->compute_stmt_type(st);
+                }
+            }
+
+            return nullptr;
+        }
+
+
+
     private:
-       Node::Cptr m_iden;
-       Node::Cptr m_type;
-       Node::Cptr m_stmt;
+       Node::Ptr m_iden;
+       Node::Ptr m_type;
+       Node::Ptr m_stmt;
 
 };  
 
@@ -237,11 +324,19 @@ private:
 
 class ReturnStatement : public Node {
 public:
-    ReturnStatement(Node::Cptr exp) : Node(), m_exp(exp) { }
+    ReturnStatement(Node::Ptr exp) : Node(), m_exp(exp) { }
     std::string as_string() const override { return fmt::format("Return({})", m_exp->as_string());}
 
+    Node::Ptr compute_stmt_type(SymbolTable &st) override{
+        if(const auto ret = m_exp->compute_stmt_type(st)){
+            return ret;
+        }
+
+        return nullptr;
+    }
+
 private:
-    Node::Cptr m_exp;        
+    Node::Ptr m_exp;        
 };
 
 

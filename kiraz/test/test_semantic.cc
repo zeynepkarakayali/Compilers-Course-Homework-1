@@ -217,8 +217,6 @@ TEST_F(CompilerFixture, class_scoped_func_conflict) {
     verify_error("class A { let a = 5; func f() : Void { let a = 5; }; };",
             "Identifier 'a' is already in symtab");
 }
-
-// here, i took segmentation fault
 TEST_F(CompilerFixture, class_use_before_definition) {
     verify_ok("let a : A; class A { };");
 }
@@ -309,8 +307,4 @@ TEST_F(CompilerFixture, func_call_type_mismatch) {
             " which does not match definition type 'String'");
 }
 
-
-TEST_F(CompilerFixture, mine) {
-    verify_ok("let a = 5; class C { let i = 0; }; func f() : Void { let c=5;};");
-}
 } // namespace kiraz

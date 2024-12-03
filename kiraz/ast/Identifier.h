@@ -15,19 +15,22 @@ class Identifier : public Node {
         std::string as_string() const override {return fmt::format("Id({})", m_id->as_string());}
 
 
+        void initialize_stmt_type() {
+            set_stmt_type(shared_from_this());
+        }
+
+
     virtual SymTabEntry get_symbol (const SymbolTable &st) const override {
         auto name = as_string();
+        name = name.substr(3, name.size() - 4);
         auto entry = st.get_cur_symtab()->get_symbol(name);
-        
-        if (entry) {
-            fmt::print("Error: Variable '{}' is declared in this scope.\n", name);
-            return {};
-        }
+
         return entry;
     }
 
     private:
         Token::Ptr m_id;
+        
 };
 }
 

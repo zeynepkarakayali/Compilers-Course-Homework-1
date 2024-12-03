@@ -269,7 +269,7 @@ member_expression: member_expression OP_DOT iden { $$ = Node::add<ast::OpDot>($1
 
 type-annot: OP_COLON iden  {$$ = $2;};
 
-iden: IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); }
+iden: IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); std::dynamic_pointer_cast<ast::Identifier>($$)->initialize_stmt_type();}
  	;
 
 signed_int: 
