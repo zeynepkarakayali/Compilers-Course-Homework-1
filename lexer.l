@@ -60,13 +60,10 @@ extern std::shared_ptr<Token> curtoken;
 "return" {colno += yyleng; curtoken = Token::New<KwClass> (); return KW_RETURN;}
 "true" {colno += yyleng; curtoken = Token::New<KwTrue> (); return KW_TRUE;}
 "false" {colno += yyleng; curtoken = Token::New<KwFalse> (); return KW_FALSE;}
-"and" {colno += yyleng; curtoken = Token::New<KwAnd> (); return KW_AND;}
-"or" {colno += yyleng; curtoken = Token::New<KwOr> (); return KW_OR;}
-"not" {colno += yyleng; curtoken = Token::New<KwNot> (); return KW_NOT;}
 
 
-
-[a-zA-Z][a-zA-Z0-9_]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
+[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
 
 
 .    {colno += yyleng; curtoken = Token::New<Rejected> ("Rejected"); return YYUNDEF; }
+

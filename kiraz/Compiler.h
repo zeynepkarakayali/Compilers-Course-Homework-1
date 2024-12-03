@@ -29,8 +29,6 @@ struct Scope {
     ScopeType scope_type;
     Node::Ptr stmt;
 
-    std::vector<std::shared_ptr<Scope>> subscopes; // alt scope'lara ulasmak icin
-
     auto find(const std::string &s) { return symbols.find(s); }
     auto find(const std::string &s) const { return symbols.find(s); }
     auto end() { return symbols.end(); }
@@ -77,51 +75,36 @@ public:
     }
 
     ScopeRef enter_scope(ScopeType scope_type, Node::Ptr stmt) {
-    assert(stmt->get_cur_symtab() == m_symbols.back());
-    // eski scope'u kopyalamak yerine yeni scope acilmasi icin
-    auto new_scope = std::make_shared<Scope>(std::map<std::string, Node::Ptr>(), scope_type, stmt); 
+        assert(stmt->get_cur_symtab() == m_symbols.back());
+        m_symbols.emplace_back(
+                std::make_shared<Scope>(m_symbols.back()->symbols, scope_type, stmt));
 
-    m_symbols.back()->subscopes.push_back(new_scope); // yeni scope'u subscope olarak eklemek icin
-    m_symbols.emplace_back(new_scope); // yeni scope'u stack'e eklemek icin
-
-    assert(m_symbols.size() > 1);
-    return ScopeRef(*this);
-}
-
-
-    void print_symbols(const std::shared_ptr<Scope>& scope, size_t level = 0) const {
-        std::string indent(level * 2, ' ');
-        std::string sct;
-        switch (scope->scope_type) {
-            case ScopeType::Module: sct = "Module"; break;
-            case ScopeType::Class: sct = "Class"; break;
-            case ScopeType::Func: sct = "Func"; break;
-            case ScopeType::Method: sct = "Method"; break;
-            default: sct = "Unknown"; break;
-        }
-
-        fmt::print("{}Scope {} (Type: {}):\n", indent, level, sct);
-        for (const auto& [name, node] : scope->symbols) {
-            fmt::print("{}  Name: {:<15}", indent, name);
-            if (node) {
-                fmt::print("    Type: {}", node->as_string());
-            }
-            fmt::print("\n");
-        }
-
-        for (const auto& subscope : scope->subscopes) {
-            print_symbols(subscope, level + 1);
-        }
+        assert(m_symbols.size() > 1);
+        return ScopeRef(*this);
     }
 
-    
     void print_symbols() const {
         fmt::print("Symbol Table Contents:\n");
-        if (!m_symbols.empty()) {
-            print_symbols(m_symbols.front()); // Module scope'tan başlayarak bastır
+        for (size_t i = 0; i < m_symbols.size(); ++i) {
+            const auto& scope = m_symbols[i];
+            std::string sct;
+            switch (static_cast<int>(scope->scope_type)) {
+                case 0: sct = "Module"; break;
+                case 1: sct = "Class"; break;
+                case 2: sct =  "Func"; break;
+                case 3: sct =  "Method"; break;
+                default: sct =  "Unknown"; break;
+            }
+            fmt::print("Scope {} (Type: {}):\n", i, sct);
+            for (const auto& [name, node] : scope->symbols) {
+                fmt::print("  Name: {:<15}", name);
+                if (node) {
+                    fmt::print("    Type: {}", node->as_string());
+                }
+                fmt::print("\n");
+            }
         }
-    }
-
+}
 
     auto get_cur_symtab() { return m_symbols.back(); }
     auto get_cur_symtab() const { return m_symbols.back(); }

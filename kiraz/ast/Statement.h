@@ -179,14 +179,11 @@ class ClassStatement : public Node{
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
         }
-
-    Node::Ptr compute_stmt_type(SymbolTable &st) override;
         
 
     private:
        Node::Cptr m_iden;
        Node::Cptr m_scope;
-       std::shared_ptr<SymbolTable> c_symtab;
 };
 
 class ImportStatement : public Node{
@@ -302,6 +299,7 @@ class WhileStatement : public Node{
         std::string as_string() const override 
         {return fmt::format("While(?={}, repeat={})", m_exp->as_string(), m_scope->as_string()); }
 
+    
     private:
        Node::Cptr m_exp;
        Node::Cptr m_scope;
