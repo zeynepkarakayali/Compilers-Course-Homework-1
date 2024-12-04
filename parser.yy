@@ -113,6 +113,7 @@ general_scope_statement:    while_stmt { $$ = $1; }
                           | if-stmt { $$ = $1; } 
                           | return-exp { $$ = $1; } 
                           | call-stmt { $$ = $1;}
+                          ;
 
 
 import-stmt: KW_IMPORT iden { $$ = Node::add<ast::ImportStatement>($2); };
@@ -197,7 +198,7 @@ func-statements: func-statements func-statement OP_SCOLON {
                                                             }
                 ;
 
-func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} | call-stmt{$$=$1;};
+func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} | call-stmt{$$=$1;} ;
 
 return-exp:   KW_RETURN expression {$$ = Node::add<ast::ReturnStatement>($2);};
             | KW_RETURN call-stmt {$$ = Node::add<ast::ReturnStatement>($2);};
@@ -252,8 +253,8 @@ expression:   KW_AND OP_LPAREN boolean OP_COMMA boolean OP_RPAREN  { $$ = Node::
             ;
 
 
-expressions:   keyword OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
-            |  iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
+expressions:  keyword OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
+            | iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
             | expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
             | expression OP_MULT expression { $$ = Node::add<ast::OpMult>($1, $3); }
@@ -272,12 +273,13 @@ expressions:   keyword OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, 
             | boolean {$$ = $1;}
             | keyword
             | STRING_LITERAL { $$ = Node::add<ast::StringLiteral>(curtoken); }
+            | member_expression {$$ = $1;}
             ;
 
 
 
-member_expression: member_expression OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); }
-                 | iden { $$ = $1; }
+member_expression: iden OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); }
+                 | member_expression OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); };
                  ;
 
 type-annot: OP_COLON iden  {$$ = $2;};

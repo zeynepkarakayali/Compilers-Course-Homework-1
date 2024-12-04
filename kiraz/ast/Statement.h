@@ -215,10 +215,7 @@ class ClassStatement : public Node{
             if(m_scope){
                 for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
 
-                    if(const auto ret = stmt->compute_stmt_type(st)){
-                        fmt::print("hellooooo");
-                        return ret;
-                    }
+                    
                     if(auto ret = stmt->add_to_symtab_forward(st)){
                         // orn. class icinde func tanimlanmaya calisiyorsa func'in add_to_symtab'ina bakiliyor
                         // sonra ordaki type checkte yakalaniyor
@@ -227,6 +224,12 @@ class ClassStatement : public Node{
                     if(auto ret = stmt->add_to_symtab_ordered(st)){
                         // orn. class icinde let tanimlanmaya calisiyorsa let'in add_to_symtab'ina bakiliyor
                         // sonra ordaki type checkte yakalaniyor
+                        return ret;
+                    }
+
+                    // ilk basta bu kontrol yapilsaydi -> class_member_conflict icin uppercase letterda hata veriyordu
+                    if(const auto ret = stmt->compute_stmt_type(st)){
+                        fmt::print("hellooooo");
                         return ret;
                     }
 
