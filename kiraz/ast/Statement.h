@@ -86,6 +86,7 @@ class FuncStatement : public Node{
             if (!ret_type){
                 return set_error(FF("Return type '{}' of function '{}' is not found", ret_type.name, m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
+            st.add_symbol("ret_type", std::const_pointer_cast<Node>(ret_type.stmt));
 
 
             auto scope = st.enter_scope(ScopeType::Func, shared_from_this());
@@ -337,6 +338,9 @@ public:
         if(const auto ret = m_exp->compute_stmt_type(st)){
             return ret;
         }
+        //BURADA KALDIM
+        get_symbol("return_type");
+        fmt::print("return type {}", m_exp->get_stmt_type()->as_string());
 
         return nullptr;
     }
@@ -390,7 +394,7 @@ class NotLogicFunc : public Node {
 public:
     NotLogicFunc(Node::Cptr value) : Node(), m_value(value){ }
     std::string as_string() const override { 
-         return fmt::format("Xor(l={})", m_value->as_string()); 
+         return fmt::format("Not(l={})", m_value->as_string()); 
     }
 
 private:

@@ -20,12 +20,10 @@ class Identifier : public Node {
         }
 
 
-    virtual SymTabEntry get_symbol (const SymbolTable &st) const override {
+    virtual Node::SymTabEntry get_symbol (const SymbolTable &st) const override {
         auto name = as_string();
         name = name.substr(3, name.size() - 4);
-        auto entry = st.get_cur_symtab()->get_symbol(name);
-
-        return entry;
+        return st.get_cur_symtab()->get_symbol(name);
     }
 
     private:

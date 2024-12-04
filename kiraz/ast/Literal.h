@@ -4,6 +4,8 @@
 #include <kiraz/Node.h>
 #include <kiraz/ast/Identifier.h>
 #include <kiraz/token/Identifier.h>
+#include <kiraz/token/Keyword.h>
+
 
 
 namespace ast {
@@ -12,6 +14,9 @@ public:
     Integer(Token::Ptr);
 
     std::string as_string() const override {return fmt::format("Int({})", m_value); }
+    virtual Node::SymTabEntry get_symbol (const SymbolTable &st) const override {
+        return st.get_cur_symtab()->get_symbol("Integer64");
+    }
 
 private:
     int64_t m_value;
@@ -51,7 +56,9 @@ public:
         
         return fmt::format("Str({})", value);
     }
-
+    virtual Node::SymTabEntry get_symbol (const SymbolTable &st) const override {
+        return st.get_cur_symtab()->get_symbol("String");
+    }
 
 private:
     Token::Ptr m_str; 
@@ -70,17 +77,35 @@ private:
     Token::Ptr m_bool; 
 };
 
-class Keyword : public Node {
+class KwAnd : public Node {
 public:
-    Keyword(Token::Ptr kw) : Node(), m_kw(kw) {}
+    KwAnd() : Node() {}
 
-    std::string as_string() const override {
-        
-        return fmt::format("{}", m_kw->as_string());
-    }
+    std::string as_string() const override { return fmt::format("and");}
+    
+    void initialize_stmt_type() { set_stmt_type(shared_from_this());}
 
-private:
-    Token::Ptr m_kw; 
+};
+
+class KwOr : public Node {
+public:
+    KwOr() : Node() {}
+
+    std::string as_string() const override { return fmt::format("or");}
+    
+    void initialize_stmt_type() { set_stmt_type(shared_from_this());}
+
+};
+
+class KwNot : public Node {
+public:
+    KwNot() : Node() {}
+
+    std::string as_string() const override { return fmt::format("not");}
+    
+    void initialize_stmt_type() { set_stmt_type(shared_from_this());}
+
+
 };
 
 }
