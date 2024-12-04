@@ -359,14 +359,10 @@ public:
 
         assert(m_exp);
         auto expr_type = m_exp->get_stmt_type();
-
-        /*
-        if(expr_type->as_string() != "Boolean"){
-            return set_error(fmt::format("If only accepts tests of type 'Boolean'"));
-        }
-        */
-        if (std::dynamic_pointer_cast<const ast::Boolean>(m_exp) == nullptr) {
-            return set_error(fmt::format("If only accepts tests of type 'Boolean'"));
+        fmt::print("Expression type: {}\n", expr_type->as_string());
+        
+        if (!m_exp || !std::dynamic_pointer_cast<const ast::Boolean>(m_exp)) {
+            return set_error("If only accepts tests of type 'Boolean'");
         }
 
         /*

@@ -308,7 +308,7 @@ TEST_F(CompilerFixture, while_misplaced_module) {
 }
 
 TEST_F(CompilerFixture, while_misplaced_class) {
-    verify_error(R"(class A{ while(true) {}; };)", "Misplaced while statement");
+    verify_error(R"(class A{ while(true) {}; };)"); // parserda hallediliyor
 }
 
 TEST_F(CompilerFixture, while_complex) {
@@ -357,7 +357,7 @@ TEST_F(CompilerFixture, if_misplaced_module) {
 }
 
 TEST_F(CompilerFixture, if_misplaced_class) {
-    verify_error(R"(class A{if(true) {};};)", "Misplaced if statement");
+    verify_error(R"(class A{if(true) {};};)"); //parserda hallediliyor
 }
 
 TEST_F(CompilerFixture, if_test_int) {
