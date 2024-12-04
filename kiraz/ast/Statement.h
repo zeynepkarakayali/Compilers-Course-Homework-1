@@ -234,12 +234,14 @@ class LetStatement : public Node{
 
             Node::Cptr type = nullptr;
 
+            // tip varsa ve stmt yoksa, tipe gore identifierin tipi belirlenir
             if(m_type && !m_stmt){ 
 
                 type = std::dynamic_pointer_cast<const Node>(m_type);
 
             }
 
+            // stmt varsa ve tip yoksa, stmt ile identifierin tipi belirlenir
             if(m_stmt && !m_type){ 
 
                 auto stmt_type =  m_stmt->get_stmt_type();
@@ -251,7 +253,7 @@ class LetStatement : public Node{
             }
 
 
-            
+            // ikisi de varsa, tip ve stmt nin tipi karsilastirilir
             if(m_stmt && m_type){
 
                 if(type->as_string() != m_type->as_string()) {
@@ -352,6 +354,49 @@ public:
         }
         return fmt::format("If(?={}, then={}, else=[])", m_exp->as_string(), m_scope->as_string());
     }
+
+    Node::Ptr compute_stmt_type(SymbolTable &st) override {    
+
+        assert(m_exp);
+        auto expr_type = m_exp->get_stmt_type();
+
+        /*
+        if(expr_type->as_string() != "Boolean"){
+            return set_error(fmt::format("If only accepts tests of type 'Boolean'"));
+        }
+        */
+        if (std::dynamic_pointer_cast<const ast::Boolean>(m_exp) == nullptr) {
+            return set_error(fmt::format("If only accepts tests of type 'Boolean'"));
+        }
+
+        /*
+        if(std::dynamic_pointer_cast<const ast::Boolean>(m_exp) == nullptr){
+            return set_error(fmt::format("If only accepts tests of type 'Boolean'"));
+        }
+        */
+
+
+        if ((st.get_scope_type() != ScopeType::Func) && (st.get_scope_type() != ScopeType::Method)) {
+            return set_error(fmt::format("Misplaced if statement"));
+        }
+
+        if(m_scope){
+            for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+                fmt::print("\n{}\n", stmt->as_string());
+                if(const auto ret = stmt->compute_stmt_type(st)){
+                    return ret;
+                }
+                if(auto ret = stmt->add_to_symtab_ordered(st)){
+                    return ret;
+                }
+
+            }
+
+        }
+
+        st.print_symbols();
+        return nullptr;
+    }  
 
 private:
     Node::Cptr m_exp;        

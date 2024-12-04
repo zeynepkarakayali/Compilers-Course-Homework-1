@@ -7,6 +7,7 @@
 #include <kiraz/Node.h>
 #include <kiraz/ast/Identifier.h>
 #include <kiraz/token/Identifier.h>
+#include <kiraz/ast/Literal.h>
 
 
 namespace ast {
@@ -121,6 +122,38 @@ public:
 class OpSmaller : public OpBinary {
 public:
     OpSmaller(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_SMALLER, left, right) {}
+
+    /*
+    Node::Ptr compute_stmt_type(SymbolTable &st) override {
+        if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+
+        assert(m_left && m_right); 
+
+        auto left_type = m_left->get_stmt_type();
+        auto right_type = m_right->get_stmt_type();
+
+        if (left_type && right_type) {
+            fmt::print("here3 {}, {}\n", left_type->as_string(), right_type->as_string());
+        }
+
+        auto entry_left = std::dynamic_pointer_cast<const ast::Identifier>(m_left)->get_symbol(st);
+        auto entry_right = std::dynamic_pointer_cast<const ast::Identifier>(m_right)->get_symbol(st);
+
+        if(entry_left && entry_right) { 
+            // eger ayni tipte seyleri kiyasliyorsam
+            if(entry_left.stmt->as_string() == entry_right.stmt->as_string()){
+                fmt::print("Types match: {}\n", entry_left.stmt->as_string());
+                // set_stmt_type(std::make_shared<ast::Boolean>(entry_left.stmt->as_string()));  // BAKK
+            } else {
+                return set_error(fmt::format("Operands must be of the same type"));
+            }    
+        }
+        return nullptr;
+    }
+    */
+    
+private:
+    Node::Ptr m_left, m_right;
 };
 
 class OpBigger : public OpBinary {
