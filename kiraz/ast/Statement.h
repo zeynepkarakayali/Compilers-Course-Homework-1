@@ -65,7 +65,9 @@ class FuncStatement : public Node{
                                                                                m_type->as_string(),  m_scope->as_string()); }
         }
 
-
+        Node::Cptr get_iden() const {
+            return m_iden;
+        }
 
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override {
@@ -151,12 +153,23 @@ class ClassStatement : public Node{
     public:
         ClassStatement(Node::Cptr iden, Node::Cptr scope) : Node(), m_iden(iden), m_scope(scope) {    
             if (!iden ) {
+                throw std::runtime_error("ClassStatement constructor received a nullptr iden");
+            }
+            if(!scope){
+                throw std::runtime_error("ClassStatement constructor received a nullptr scope");
+            }
+        }
+        /*
+        ClassStatement(Node::Cptr iden, Node::Cptr scope, Node::Cptr parent_class = nullptr) : Node(), m_iden(iden), m_scope(scope), m_parent_class(parent_class) {    
+            if (!iden ) {
                 throw std::runtime_error("FuncStatement constructor received a nullptr iden");
             }
             if(!scope){
                 throw std::runtime_error("FuncStatement constructor received a nullptr scope");
             }
         }
+        */
+        
         std::string as_string() const override  {return fmt::format("Class(n={}, s={})", m_iden->as_string(),  m_scope->as_string()); }
 
 
@@ -175,7 +188,7 @@ class ClassStatement : public Node{
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override{
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
-                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
@@ -190,8 +203,6 @@ class ClassStatement : public Node{
                 return set_error(fmt::format("Misplaced class statement"));
             }
 
-            //auto class_iden = m_iden->as_string().substr(3, m_iden->as_string().size() - 4);
-            //auto class_iden = m_iden->get_symbol(st);
             if(auto class_iden = m_iden->get_symbol(st); class_iden.first_letter_lowercase()){
                 return set_error(fmt::format("Class name '{}' can not start with an lowercase letter", class_iden.name));
             }
@@ -203,20 +214,19 @@ class ClassStatement : public Node{
 
             if(m_scope){
                 for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
-                    fmt::print("\n{}\n", stmt->as_string());
-
-                    auto iden_entry = stmt->get_symbol(st);
-                    // eger kontrol edecegimiz identifier zaten st'de varsa
-                    if(iden_entry){
-                        if (get_subsymbol(stmt)) {
-                            return set_error(fmt::format("Identifier '{}' is already defined in this scope", stmt->as_string().substr(3, m_iden->as_string().size() - 4)));
-                        }
-                    }
 
                     if(const auto ret = stmt->compute_stmt_type(st)){
+                        fmt::print("hellooooo");
+                        return ret;
+                    }
+                    if(auto ret = stmt->add_to_symtab_forward(st)){
+                        // orn. class icinde func tanimlanmaya calisiyorsa func'in add_to_symtab'ina bakiliyor
+                        // sonra ordaki type checkte yakalaniyor
                         return ret;
                     }
                     if(auto ret = stmt->add_to_symtab_ordered(st)){
+                        // orn. class icinde let tanimlanmaya calisiyorsa let'in add_to_symtab'ina bakiliyor
+                        // sonra ordaki type checkte yakalaniyor
                         return ret;
                     }
 
@@ -229,7 +239,7 @@ class ClassStatement : public Node{
         }
 
         SymTabEntry get_subsymbol(Ptr stmt) const override {
-            // Symtab'da belirtilen identifier var mi
+            // Symtab'da belirtilen entryi bulur
             for (const auto &entry : m_symbols) {
                 if (entry.name == stmt->as_string()) {
                     return entry;
@@ -242,6 +252,7 @@ class ClassStatement : public Node{
     private:
        Node::Cptr m_iden;
        Node::Cptr m_scope;
+       Node::Cptr m_parent_class; // parent class icin
        std::shared_ptr<SymbolTable> m_symtab;
        std::vector<SymTabEntry> m_symbols;
 };
@@ -288,7 +299,7 @@ class LetStatement : public Node{
         virtual Node::Ptr add_to_symtab_ordered(SymbolTable &st) override{
 
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
-                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
 
             Node::Cptr type = nullptr;
