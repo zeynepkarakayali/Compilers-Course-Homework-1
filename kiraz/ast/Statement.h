@@ -180,11 +180,70 @@ class ClassStatement : public Node{
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
         }
+
+        Node::Ptr compute_stmt_type(SymbolTable &st) override {
+
+            if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+
+            // modul seviyesinde degilse
+            if(st.get_scope_type() != ScopeType::Module){
+                return set_error(fmt::format("Misplaced class statement"));
+            }
+
+            //auto class_iden = m_iden->as_string().substr(3, m_iden->as_string().size() - 4);
+            //auto class_iden = m_iden->get_symbol(st);
+            if(auto class_iden = m_iden->get_symbol(st); class_iden.first_letter_lowercase()){
+                return set_error(fmt::format("Class name '{}' can not start with an lowercase letter", class_iden.name));
+            }
+
+            assert(!m_symtab);
+            m_symtab = std::make_shared<SymbolTable>(ScopeType::Class);
+
+            auto scope = st.enter_scope(ScopeType::Class, shared_from_this());
+
+            if(m_scope){
+                for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+                    fmt::print("\n{}\n", stmt->as_string());
+
+                    auto iden_entry = stmt->get_symbol(st);
+                    // eger kontrol edecegimiz identifier zaten st'de varsa
+                    if(iden_entry){
+                        if (get_subsymbol(stmt)) {
+                            return set_error(fmt::format("Identifier '{}' is already defined in this scope", stmt->as_string().substr(3, m_iden->as_string().size() - 4)));
+                        }
+                    }
+
+                    if(const auto ret = stmt->compute_stmt_type(st)){
+                        return ret;
+                    }
+                    if(auto ret = stmt->add_to_symtab_ordered(st)){
+                        return ret;
+                    }
+
+                }
+
+            }
+
+            st.print_symbols();
+            return nullptr;
+        }
+
+        SymTabEntry get_subsymbol(Ptr stmt) const override {
+            // Symtab'da belirtilen identifier var mi
+            for (const auto &entry : m_symbols) {
+                if (entry.name == stmt->as_string()) {
+                    return entry;
+                }
+            }
+            return {};
+        }
         
 
     private:
        Node::Cptr m_iden;
        Node::Cptr m_scope;
+       std::shared_ptr<SymbolTable> m_symtab;
+       std::vector<SymTabEntry> m_symbols;
 };
 
 class ImportStatement : public Node{
