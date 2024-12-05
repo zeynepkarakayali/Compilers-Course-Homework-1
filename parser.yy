@@ -57,29 +57,7 @@ extern int yylineno;
 %token    L_INTEGER
 
 
-%token    KW_IMPORT
-%token    KW_FUNC
-%token    KW_LET
-%token    KW_IF
-%token    KW_ELSE
-%token    KW_WHILE
-%token    KW_CLASS
-%token    KW_RETURN
-%token    KW_TRUE
-%token    KW_FALSE
 
-
-%token    STRING_LITERAL
-%token    IDENTIFIER
-
-%left      OP_SCOLON
-%right     OP_ASSIGN
-%left      OP_EQUALS
-%left      OP_SMALLER OP_BIGGER
-%left      OP_LE OP_GE
-%left      OP_PLUS OP_MINUS
-%left      OP_MULT OP_DIVF
-%left      OP_DOT
 
 %token    STRING_LITERAL
 %token    IDENTIFIER
@@ -145,7 +123,8 @@ import-stmt: KW_IMPORT iden { $$ = Node::add<ast::ImportStatement>($2); };
 
 
 
-class-declaration: KW_CLASS iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $3); }
+class-declaration:  KW_CLASS iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $3, nullptr); }
+                 | KW_CLASS iden OP_COLON iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $5, $4); }
                  ;
 
 class-scope : OP_LBRACE class-statements OP_RBRACE { 
@@ -255,6 +234,7 @@ compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE {
              ;
 call-stmt:  member_expression OP_LPAREN call_arguments OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, $3);}
             | member_expression OP_LPAREN OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, nullptr); };
+
             ;
 
 
@@ -294,10 +274,10 @@ expressions:   expressions OP_ASSIGN expressions { $$ = Node::add<ast::OpAssign>
             | OP_PLUS OP_LPAREN expressions OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_PLUS, $3); }
             | signed_int {$$ = $1;}
             | integer {$$ = $1;}
-            | iden {$$ = $1;}
             | boolean {$$ = $1;}
             | keyword {$$ = $1;}
             | STRING_LITERAL { $$ = Node::add<ast::StringLiteral>(curtoken); }
+            | member_expression {$$ = $1;}
             ;
 
 
@@ -344,4 +324,3 @@ int yyerror(const char *s) {
 
     return 1;
 }
-

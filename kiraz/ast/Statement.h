@@ -136,10 +136,7 @@ class FuncStatement : public Node{
 
             }
 
-                        fmt::print("\n\nFUNC SCOPE\n\n");
             
-            st.print_symbols();
-
             return nullptr;
 
         }
@@ -159,14 +156,17 @@ class FuncStatement : public Node{
 
 class ClassStatement : public Node{
     public:
-        ClassStatement(Node::Cptr iden, Node::Cptr scope) : Node(), m_iden(iden), m_scope(scope) {    
+        ClassStatement(Node::Ptr iden, Node::Ptr scope, Node::Ptr parent_class = nullptr) : Node(), m_iden(iden), m_scope(scope), m_parent_class(parent_class) {    
             if (!iden ) {
-                throw std::runtime_error("FuncStatement constructor received a nullptr iden");
+                throw std::runtime_error("ClassStatement constructor received a nullptr iden");
             }
             if(!scope){
-                throw std::runtime_error("FuncStatement constructor received a nullptr scope");
+                throw std::runtime_error("ClassStatement constructor received a nullptr scope");
             }
         }
+        
+        
+        
         std::string as_string() const override  {return fmt::format("Class(n={}, s={})", m_iden->as_string(),  m_scope->as_string()); }
 
 
@@ -182,15 +182,23 @@ class ClassStatement : public Node{
             return entry;
         }
 
-
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override{
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
+
+            if(m_parent_class){
+                auto symbol = m_parent_class->get_symbol(st);
+
+                if(!(symbol.stmt)){
+                    return set_error(fmt::format("Type '{}' is not found", m_parent_class->as_string().substr(3, m_parent_class->as_string().size() - 4)));
+                }
+            }
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
         }
-         Node::Ptr compute_stmt_type(SymbolTable &st) override {
+
+        Node::Ptr compute_stmt_type(SymbolTable &st) override {
 
             if(auto ret = Node::compute_stmt_type(st)){ return ret; }
 
@@ -204,43 +212,63 @@ class ClassStatement : public Node{
             }
 
             assert(!m_symtab);
-            m_symtab = std::make_shared<SymbolTable>(ScopeType::Class);
-
+            m_symtab = std::make_unique<SymbolTable>(ScopeType::Class);
+                for (const auto& pair : st.get_cur_symtab()->symbols) {
+                    m_symtab->add_symbol(pair.first, pair.second);
+                }
             auto scope = st.enter_scope(ScopeType::Class, shared_from_this());
 
             if(m_scope){
-                for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+
+            for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+                fmt::print("\n{}\n", stmt->as_string());
+                    if(auto ret = stmt->add_to_symtab_forward(st)){
+                        return ret;
+                    }
+                    if(auto ret = stmt->add_to_symtab_forward(*m_symtab)){
+                        return ret;
+                    }
+            }
+
+            for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+
+                    if(auto ret = stmt->add_to_symtab_ordered(st)){
+                        return ret;
+                    } 
+
+                    if(auto ret = stmt->add_to_symtab_ordered(*m_symtab)){
+                        return ret;
+                    }
+                    fmt::print("\n{}\n", stmt->as_string());
+
 
                     if(const auto ret = stmt->compute_stmt_type(st)){
-                        fmt::print("hellooooo");
                         return ret;
                     }
-                    if(auto ret = stmt->add_to_symtab_forward(st)){
-                        // orn. class icinde func tanimlanmaya calisiyorsa func'in add_to_symtab'ina bakiliyor
-                        // sonra ordaki type checkte yakalaniyor
-                        return ret;
-                    }
-                    if(auto ret = stmt->add_to_symtab_ordered(st)){
-                        // orn. class icinde let tanimlanmaya calisiyorsa let'in add_to_symtab'ina bakiliyor
-                        // sonra ordaki type checkte yakalaniyor
-                        return ret;
-                    }
+
+                    m_symtab->print_symbols();
+
 
                 }
-
             }
 
             st.print_symbols();
             return nullptr;
         }
 
+        SymTabEntry get_subsymbol(Ptr stmt) const override {
+            return m_symtab->get_symbol(stmt->as_string().substr(3, stmt->as_string().size() - 4));
+        }
+        
+
     private:
-       Node::Cptr m_iden;
-       Node::Cptr m_scope;
-       Node::Cptr m_parent_class; 
-       std::shared_ptr<SymbolTable> m_symtab;
+       Node::Ptr m_iden;
+       Node::Ptr m_scope;
+       Node::Ptr m_parent_class; // parent class icin
+       std::unique_ptr<SymbolTable> m_symtab;
        std::vector<SymTabEntry> m_symbols;
 };
+
 
 class ImportStatement : public Node{
     public:
@@ -257,17 +285,18 @@ class ImportStatement : public Node{
             }
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), m_iden);
 
-            /*
-            ast::Module module( st.get_module_io()) ;
-                                    fmt::print("\n\nBASLADI\n\n");
-
-            module.add_entry_to_the_symtab(st.get_module_io());
-            */
-            //st.get_module_io()->compute_stmt_type(st);
-            fmt::print("\n\nBITTI\n\n");
-
             return nullptr;
         }
+
+
+         Node::Ptr compute_stmt_type(SymbolTable &st) override {
+            if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+            auto module_io = st.get_module_io();
+            module_io->compute_stmt_type(st);
+            return nullptr;
+         }
+
+
 
         
 
