@@ -64,7 +64,6 @@ Node::Ptr Compiler::compile_module(const std::string &str) {
     yyparse();
     auto retval = Node::pop_root();
     reset();
-
     return retval;
 }
 

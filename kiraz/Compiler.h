@@ -163,4 +163,7 @@ private:
     std::string m_error;
     static Compiler *s_current;
 };
+
+
+
 #endif // COMPILER_H

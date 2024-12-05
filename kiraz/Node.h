@@ -129,6 +129,8 @@ public:
      */
     virtual SymTabEntry get_subsymbol(Ptr) const { return {}; }
 
+
+
     /*
      * Static interface
      */
