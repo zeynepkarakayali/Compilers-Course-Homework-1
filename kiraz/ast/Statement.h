@@ -6,6 +6,7 @@
 #include <kiraz/NodeList.h>
 #include <kiraz/ast/Operator.h>
 #include <kiraz/ast/List.h>
+#include <kiraz/ast/Literal.h>
 #include <kiraz/ast/Module.h>
 
 
@@ -65,7 +66,9 @@ class FuncStatement : public Node{
                                                                                m_type->as_string(),  m_scope->as_string()); }
         }
 
-
+        Node::Cptr get_iden() const {
+            return m_iden;
+        }
 
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override {
@@ -159,14 +162,17 @@ class FuncStatement : public Node{
 
 class ClassStatement : public Node{
     public:
-        ClassStatement(Node::Cptr iden, Node::Cptr scope) : Node(), m_iden(iden), m_scope(scope) {    
+        ClassStatement(Node::Ptr iden, Node::Ptr scope, Node::Ptr parent_class = nullptr) : Node(), m_iden(iden), m_scope(scope), m_parent_class(parent_class) {    
             if (!iden ) {
-                throw std::runtime_error("FuncStatement constructor received a nullptr iden");
+                throw std::runtime_error("ClassStatement constructor received a nullptr iden");
             }
             if(!scope){
-                throw std::runtime_error("FuncStatement constructor received a nullptr scope");
+                throw std::runtime_error("ClassStatement constructor received a nullptr scope");
             }
         }
+        
+        
+        
         std::string as_string() const override  {return fmt::format("Class(n={}, s={})", m_iden->as_string(),  m_scope->as_string()); }
 
 
@@ -182,16 +188,26 @@ class ClassStatement : public Node{
             return entry;
         }
 
-
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override{
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
+
+            if(m_parent_class){
+                fmt::print("helloo");
+                // parent class symtab'da var mi
+                if(!get_subsymbol(m_iden)){
+                    fmt::print("merhabaaaa");
+                    return set_error(fmt::format("Type '{}' is not found", m_parent_class->as_string().substr(3, m_parent_class->as_string().size() - 4)));
+                }
+            }
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
         }
-         Node::Ptr compute_stmt_type(SymbolTable &st) override {
 
+        Node::Ptr compute_stmt_type(SymbolTable &st) override {
+
+            fmt::print("heyyy\n");
             if(auto ret = Node::compute_stmt_type(st)){ return ret; }
 
             // modul seviyesinde degilse
@@ -211,10 +227,6 @@ class ClassStatement : public Node{
             if(m_scope){
                 for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
 
-                    if(const auto ret = stmt->compute_stmt_type(st)){
-                        fmt::print("hellooooo");
-                        return ret;
-                    }
                     if(auto ret = stmt->add_to_symtab_forward(st)){
                         // orn. class icinde func tanimlanmaya calisiyorsa func'in add_to_symtab'ina bakiliyor
                         // sonra ordaki type checkte yakalaniyor
@@ -226,18 +238,33 @@ class ClassStatement : public Node{
                         return ret;
                     }
 
+                    // ilk basta bu kontrol yapilsaydi -> class_member_conflict icin uppercase letterda hata veriyordu
+                    if(const auto ret = stmt->compute_stmt_type(st)){
+                        fmt::print("aaaaa");
+                        return ret;
+                    }
                 }
-
             }
 
             st.print_symbols();
             return nullptr;
         }
 
+        SymTabEntry get_subsymbol(Ptr stmt) const override {
+            // Symtab'da belirtilen entryi bulur
+            for (const auto &entry : m_symbols) {
+                if (entry.name == stmt->as_string()) {
+                    return entry;
+                }
+            }
+            return {};
+        }
+        
+
     private:
-       Node::Cptr m_iden;
-       Node::Cptr m_scope;
-       Node::Cptr m_parent_class; 
+       Node::Ptr m_iden;
+       Node::Ptr m_scope;
+       Node::Ptr m_parent_class; // parent class icin
        std::shared_ptr<SymbolTable> m_symtab;
        std::vector<SymTabEntry> m_symbols;
 };
@@ -310,11 +337,12 @@ class LetStatement : public Node{
 
             Node::Cptr type = nullptr;
 
-
+            // tip varsa ve stmt yoksa, tipe gore identifierin tipi belirlenir
             if(m_type && !m_stmt){ 
                 type = std::dynamic_pointer_cast<const Node>(m_type);
             }
 
+            // stmt varsa ve tip yoksa, stmt ile identifierin tipi belirlenir
             if(m_stmt && !m_type){ 
                 auto stmt_type =  m_stmt->get_stmt_type();
                 if(stmt_type) {
@@ -323,7 +351,8 @@ class LetStatement : public Node{
                 }
                 
             }
-            
+
+            // ikisi de varsa, tip ve stmt nin tipi karsilastirilir
             if(m_stmt && m_type){
                 fmt::print("m_stmt_type: {}, m_type: {}", m_stmt->get_stmt_type()->as_string() , m_type->as_string());
 
@@ -393,6 +422,20 @@ class WhileStatement : public Node{
             if(m_exp->get_stmt_type()->as_string() != "Id(Boolean)"){
                 return set_error(FF("While only accepts tests of type 'Boolean'"));
             }
+  
+            if(m_scope){
+                for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+                    fmt::print("\n{}\n", stmt->as_string());
+                    if(const auto ret = stmt->compute_stmt_type(st)){
+                        return ret;
+                    }
+                    if(auto ret = stmt->add_to_symtab_ordered(st)){
+                        return ret;
+                    }
+
+                }
+
+            }
 
             return nullptr;
         }
@@ -433,7 +476,22 @@ public:
         fmt::print("if expression type: {}\n", m_exp->get_stmt_type()->as_string());
         if(m_exp->get_stmt_type()->as_string() != "Id(Boolean)"){
             return set_error(FF("If only accepts tests of type 'Boolean'"));
-        }        return nullptr;
+        }        
+        
+        if(m_scope){
+            for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+                fmt::print("\n{}\n", stmt->as_string());
+                if(const auto ret = stmt->compute_stmt_type(st)){
+                    return ret;
+                }
+                if(auto ret = stmt->add_to_symtab_ordered(st)){
+                    return ret;
+                }
+
+            }
+
+        }
+        return nullptr;
      }
 
 private:

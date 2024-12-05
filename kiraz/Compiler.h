@@ -150,4 +150,3 @@ private:
 };
 
 #endif // COMPILER_H
-
