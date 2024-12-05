@@ -66,7 +66,9 @@ private:
 
 class Boolean : public Node {
 public:
-    Boolean(Token::Ptr bl) : Node(), m_bool(bl) {}
+    Boolean(Token::Ptr bl) : Node(), m_bool(bl) {
+        Boolean::set_stmt_type(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("Boolean")));
+    }
 
     std::string as_string() const override {
         

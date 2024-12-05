@@ -6,6 +6,7 @@
 #include <kiraz/NodeList.h>
 #include <kiraz/ast/Operator.h>
 #include <kiraz/ast/List.h>
+#include <kiraz/ast/Module.h>
 
 
 namespace ast {
@@ -68,12 +69,19 @@ class FuncStatement : public Node{
 
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override {
-
+ 
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
 
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
+
+            auto ret_type = m_type->get_symbol(st);
+ 
+            if (!ret_type.stmt){
+                return set_error(FF("Return type '{}' of function '{}' is not found", ret_type.name, m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
+            }
+            st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4) +"_ret_type", std::const_pointer_cast<Node>(ret_type.stmt));
             return nullptr;
         }
 
@@ -82,19 +90,19 @@ class FuncStatement : public Node{
             if(auto ret = Node::compute_stmt_type(st)){ return ret; }
 
 
-            auto ret_type = m_type->get_symbol(st); 
-            if (!ret_type){
+            auto scope = st.enter_scope(ScopeType::Func, shared_from_this());
+
+           auto ret_type = m_type->get_symbol(st); 
+            if (!ret_type.stmt){
                 return set_error(FF("Return type '{}' of function '{}' is not found", ret_type.name, m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
             st.add_symbol("ret_type", std::const_pointer_cast<Node>(ret_type.stmt));
-
-
-            auto scope = st.enter_scope(ScopeType::Func, shared_from_this());
+            //set_stmt_type(ret_type.stmt);
 
             if(m_args){
                 for(const auto &stmt : dynamic_cast<const ArgList&>(*m_args).get_arguments()){
                     auto stmt_name = stmt->get_name();
-                    auto stmt_type = stmt->get_type();
+                    auto stmt_type = stmt->get_type(); 
                     if(auto s_stmt = std::const_pointer_cast<Node>(stmt_name)->get_symbol(st)){
 
                         return set_error(FF("Identifier '{}' in argument list of function '{}' is already in symtab", s_stmt.name, m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
@@ -128,8 +136,10 @@ class FuncStatement : public Node{
 
             }
 
+                        fmt::print("\n\nFUNC SCOPE\n\n");
             
             st.print_symbols();
+
             return nullptr;
 
         }
@@ -175,28 +185,94 @@ class ClassStatement : public Node{
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override{
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
-                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
         }
-        
+         Node::Ptr compute_stmt_type(SymbolTable &st) override {
+
+            if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+
+            // modul seviyesinde degilse
+            if(st.get_scope_type() != ScopeType::Module){
+                return set_error(fmt::format("Misplaced class statement"));
+            }
+
+            if(auto class_iden = m_iden->get_symbol(st); class_iden.first_letter_lowercase()){
+                return set_error(fmt::format("Class name '{}' can not start with an lowercase letter", class_iden.name));
+            }
+
+            assert(!m_symtab);
+            m_symtab = std::make_shared<SymbolTable>(ScopeType::Class);
+
+            auto scope = st.enter_scope(ScopeType::Class, shared_from_this());
+
+            if(m_scope){
+                for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+
+                    if(const auto ret = stmt->compute_stmt_type(st)){
+                        fmt::print("hellooooo");
+                        return ret;
+                    }
+                    if(auto ret = stmt->add_to_symtab_forward(st)){
+                        // orn. class icinde func tanimlanmaya calisiyorsa func'in add_to_symtab'ina bakiliyor
+                        // sonra ordaki type checkte yakalaniyor
+                        return ret;
+                    }
+                    if(auto ret = stmt->add_to_symtab_ordered(st)){
+                        // orn. class icinde let tanimlanmaya calisiyorsa let'in add_to_symtab'ina bakiliyor
+                        // sonra ordaki type checkte yakalaniyor
+                        return ret;
+                    }
+
+                }
+
+            }
+
+            st.print_symbols();
+            return nullptr;
+        }
 
     private:
        Node::Cptr m_iden;
        Node::Cptr m_scope;
+       Node::Cptr m_parent_class; 
+       std::shared_ptr<SymbolTable> m_symtab;
+       std::vector<SymTabEntry> m_symbols;
 };
 
 class ImportStatement : public Node{
     public:
-        ImportStatement(Node::Cptr iden) : Node(), m_iden(iden) {    
+        ImportStatement(Node::Ptr iden) : Node(), m_iden(iden) {    
 
     }
         std::string as_string() const override 
         {return fmt::format("Import({})", m_iden->as_string()); }
 
+
+        virtual Node::Ptr add_to_symtab_ordered(SymbolTable &st) override{
+            if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
+            }
+            st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), m_iden);
+
+            /*
+            ast::Module module( st.get_module_io()) ;
+                                    fmt::print("\n\nBASLADI\n\n");
+
+            module.add_entry_to_the_symtab(st.get_module_io());
+            */
+            //st.get_module_io()->compute_stmt_type(st);
+            fmt::print("\n\nBITTI\n\n");
+
+            return nullptr;
+        }
+
+        
+
     private:
-       Node::Cptr m_iden;
+       Node::Ptr m_iden;
 
 };
 
@@ -229,33 +305,36 @@ class LetStatement : public Node{
         virtual Node::Ptr add_to_symtab_ordered(SymbolTable &st) override{
 
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
-                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string()));
+                return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
             }
 
             Node::Cptr type = nullptr;
 
+
             if(m_type && !m_stmt){ 
-
                 type = std::dynamic_pointer_cast<const Node>(m_type);
-
             }
 
             if(m_stmt && !m_type){ 
-
                 auto stmt_type =  m_stmt->get_stmt_type();
                 if(stmt_type) {
                     type = stmt_type;
-                    fmt::print("let type: {}", type->as_string());
+                    fmt::print("let type: {}\n", type->as_string());
                 }
                 
             }
-
-
             
             if(m_stmt && m_type){
+                fmt::print("m_stmt_type: {}, m_type: {}", m_stmt->get_stmt_type()->as_string() , m_type->as_string());
 
-                if(type->as_string() != m_type->as_string()) {
-                    return set_error(fmt::format("Left type '{}' of assignment does not match the right type '{}'\n", std::const_pointer_cast<Node>(type)->as_string(), m_type->as_string()));
+                if(m_stmt->get_stmt_type()->as_string() != get_m_type()->as_string()) {
+                    type = m_type;
+                    auto type_string = std::const_pointer_cast<Node>(type)->as_string();
+                    auto type_string2 = m_stmt->get_stmt_type()->as_string();
+                    return set_error(fmt::format("Initializer type '{}' doesn't match explicit type '{}'", 
+                                                    type_string2.substr(3, type_string2.size() - 4),
+                                                    type_string.substr(3, type_string.size() - 4)
+                                                    ));
                 }
             }
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), std::const_pointer_cast<Node>(type));
@@ -281,7 +360,7 @@ class LetStatement : public Node{
             return nullptr;
         }
 
-
+        Node::Ptr get_m_type(){ return m_type; }
 
     private:
        Node::Ptr m_iden;
@@ -294,15 +373,33 @@ class LetStatement : public Node{
 
 class WhileStatement : public Node{
     public:
-        WhileStatement(Node::Cptr exp, Node::Cptr scope) : Node(), m_exp(exp), m_scope(scope) {    
+        WhileStatement(Node::Ptr exp, Node::Ptr scope) : Node(), m_exp(exp), m_scope(scope) {    
 
     }
         std::string as_string() const override 
         {return fmt::format("While(?={}, repeat={})", m_exp->as_string(), m_scope->as_string()); }
 
+
+        Node::Ptr compute_stmt_type(SymbolTable &st) override{
+
+            if(auto ret = Node::compute_stmt_type(st)){ return ret;}
+            if(auto ret = m_exp->compute_stmt_type(st)){ return ret;}
+
+            if((st.get_scope_type() == ScopeType::Class) || (st.get_scope_type() == ScopeType::Module)){
+                return set_error(FF("Misplaced while statement"));
+            }
+
+            fmt::print("while expression type: {}\n", m_exp->get_stmt_type()->as_string());
+            if(m_exp->get_stmt_type()->as_string() != "Id(Boolean)"){
+                return set_error(FF("While only accepts tests of type 'Boolean'"));
+            }
+
+            return nullptr;
+        }
+
     private:
-       Node::Cptr m_exp;
-       Node::Cptr m_scope;
+       Node::Ptr m_exp;
+       Node::Ptr m_scope;
 
 };
 
@@ -311,7 +408,7 @@ class WhileStatement : public Node{
 
 class IfStatement : public Node {
 public:
-    IfStatement(Node::Cptr exp, Node::Cptr scope, Node::Cptr else_scope = nullptr) 
+    IfStatement(Node::Ptr exp, Node::Ptr scope, Node::Ptr else_scope = nullptr) 
         : Node(), m_exp(exp), m_scope(scope), m_else_scope(else_scope) { }
 
     std::string as_string() const override 
@@ -322,10 +419,27 @@ public:
         return fmt::format("If(?={}, then={}, else=[])", m_exp->as_string(), m_scope->as_string());
     }
 
+
+     Node::Ptr compute_stmt_type(SymbolTable &st) override{
+        if(auto ret = Node::compute_stmt_type(st)){ return ret;}
+
+        if(auto ret = m_exp->compute_stmt_type(st)){ return ret;}
+
+
+        if((st.get_scope_type() == ScopeType::Class) || (st.get_scope_type() == ScopeType::Module)){
+            return set_error(FF("Misplaced if statement"));
+        }
+
+        fmt::print("if expression type: {}\n", m_exp->get_stmt_type()->as_string());
+        if(m_exp->get_stmt_type()->as_string() != "Id(Boolean)"){
+            return set_error(FF("If only accepts tests of type 'Boolean'"));
+        }        return nullptr;
+     }
+
 private:
-    Node::Cptr m_exp;        
-    Node::Cptr m_scope;      
-    Node::Cptr m_else_scope; 
+    Node::Ptr m_exp;        
+    Node::Ptr m_scope;      
+    Node::Ptr m_else_scope; 
 };
 
 
@@ -335,12 +449,31 @@ public:
     std::string as_string() const override { return fmt::format("Return({})", m_exp->as_string());}
 
     Node::Ptr compute_stmt_type(SymbolTable &st) override{
+        if(auto ret = Node::compute_stmt_type(st)){ return ret;}
+
+
+        if(!(st.get_scope_type() == ScopeType::Func)){
+            return set_error(FF("Misplaced return statement"));
+        }
+
         if(const auto ret = m_exp->compute_stmt_type(st)){
             return ret;
         }
         //BURADA KALDIM
-        get_symbol("return_type");
-        fmt::print("return type {}", m_exp->get_stmt_type()->as_string());
+        Node::Ptr ret_type = std::make_shared<ast::Identifier>(Token::New<token::Identifier>("ret_type"));
+        Node::SymTabEntry ret_symbol = ret_type->get_symbol(st);
+                fmt::print("return type {}\n", m_exp->get_stmt_type()->as_string());
+                fmt::print("func return type {}\n", ret_symbol.stmt->as_string());
+
+
+        if(ret_symbol.stmt){
+            if(!(ret_symbol.stmt->as_string() == m_exp->get_stmt_type()->as_string())){
+                auto m_exp_string = m_exp->get_stmt_type()->as_string();
+                auto ret_s_string = ret_symbol.stmt->as_string();
+                return set_error(FF("Return statement type '{}' does not match function return type '{}'", m_exp_string.substr(3, m_exp_string.size() - 4),
+                                                                                                            ret_s_string.substr(3, ret_s_string.size() - 4)));
+            }
+        }
 
         return nullptr;
     }
@@ -352,53 +485,104 @@ private:
 
 class CallStatement : public Node {
 public:
-    CallStatement(Node::Cptr exp, Node::Cptr args = nullptr) : Node(), m_exp(exp) , m_args(args){ }
+    CallStatement(Node::Ptr exp, Node::Ptr args = nullptr) : Node(), m_exp(exp) , m_args(args){ }
     std::string as_string() const override { 
         if(m_args) {return fmt::format("Call(n={}, a=FuncArgs([{}]))", m_exp->as_string(), m_args->as_string());}
          return fmt::format("Call(n={} ,a=[()])", m_exp->as_string());
         
     }
 
+    Node::Ptr compute_stmt_type(SymbolTable &st) override{
+        if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+        if(auto ret = m_exp->compute_stmt_type(st)){
+            return ret;
+        }
+
+        auto call_name = m_exp->get_symbol(st); 
+        fmt::print("call_name {}\n", call_name.name);
+        if (!call_name.stmt){
+            return set_error(FF("Identifier '{}' is not found", call_name.name));
+        }
+        
+        Node::Ptr ret_type = std::make_shared<ast::Identifier>(Token::New<token::Identifier>(m_exp->as_string().substr(3, m_exp->as_string().size() - 4) +"_ret_type"));
+
+        auto ret_name = ret_type->get_symbol(st); 
+        fmt::print("ret_name {}\n", ret_name.name);
+        fmt::print("ret_type {}\n", ret_name.stmt->as_string());
+
+        if (!ret_name.stmt){
+            return set_error(FF("Call error 2"));
+        }
+
+        set_stmt_type(ret_name.stmt);
+        return nullptr;
+            
+    }
 private:
-    Node::Cptr m_exp;      
-    Node::Cptr m_args;          
+    Node::Ptr m_exp;      
+    Node::Ptr m_args;          
 };
 
 
 class AndLogicFunc : public Node {
 public:
-    AndLogicFunc(Node::Cptr left, Node::Cptr right) : Node(), m_left(left) , m_right(right){ }
+    AndLogicFunc(Node::Ptr left, Node::Ptr right) : Node(), m_left(left) , m_right(right){ }
     std::string as_string() const override { 
          return fmt::format("And(l={}, r={})", m_left->as_string(), m_right->as_string()); 
     }
 
+    Node::Ptr compute_stmt_type(SymbolTable &st) override {
+        if(auto ret = m_left->compute_stmt_type(st)){ return ret;}
+        if(auto ret = m_right->compute_stmt_type(st)){ return ret;}
+
+        if(auto ret = Node::compute_stmt_type(st)){ return ret;}
+        set_stmt_type(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("Boolean")));  
+        return nullptr;
+    }
 private:
-    Node::Cptr m_left;      
-    Node::Cptr m_right;          
+    Node::Ptr m_left;      
+    Node::Ptr m_right;          
 };
 
 
 class OrLogicFunc : public Node {
 public:
-    OrLogicFunc(Node::Cptr left, Node::Cptr right) : Node(), m_left(left) , m_right(right){ }
+    OrLogicFunc(Node::Ptr left, Node::Ptr right) : Node(), m_left(left) , m_right(right){ }
     std::string as_string() const override { 
          return fmt::format("Or(l={}, r={})", m_left->as_string(), m_right->as_string()); 
     }
 
+        Node::Ptr compute_stmt_type(SymbolTable &st) override {
+
+        if(auto ret = m_left->compute_stmt_type(st)){ return ret;}
+        if(auto ret = m_right->compute_stmt_type(st)){ return ret;}
+
+        if(auto ret = Node::compute_stmt_type(st)){ return ret;}
+        set_stmt_type(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("Boolean")));  
+        return nullptr;
+    }
+
 private:
-    Node::Cptr m_left;      
-    Node::Cptr m_right;          
+    Node::Ptr m_left;      
+    Node::Ptr m_right;          
 };
 
 class NotLogicFunc : public Node {
 public:
-    NotLogicFunc(Node::Cptr value) : Node(), m_value(value){ }
+    NotLogicFunc(Node::Ptr value) : Node(), m_value(value){ }
     std::string as_string() const override { 
          return fmt::format("Not(l={})", m_value->as_string()); 
     }
 
+        Node::Ptr compute_stmt_type(SymbolTable &st) override {
+        if(auto ret = m_value->compute_stmt_type(st)){ return ret;}
+        if(auto ret = Node::compute_stmt_type(st)){ return ret;}
+        set_stmt_type(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("Boolean")));  
+        return nullptr;
+    }
+
 private:
-    Node::Cptr m_value;      
+    Node::Ptr m_value;      
 };
 
 

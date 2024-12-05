@@ -232,7 +232,7 @@ compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE {
                 | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
              ;
 call-stmt:  member_expression OP_LPAREN call_arguments OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, $3);}
-            | member_expression OP_LPAREN OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, nullptr);};
+            | member_expression OP_LPAREN OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, nullptr); };
             ;
 
 
@@ -249,14 +249,15 @@ call_arguments:   call_arguments OP_COMMA expression {
                 ;
 
 
-expression:   KW_AND OP_LPAREN boolean OP_COMMA boolean OP_RPAREN  { $$ = Node::add<ast::AndLogicFunc>($3, $5); }
-            | KW_OR OP_LPAREN boolean OP_COMMA boolean OP_RPAREN  { $$ = Node::add<ast::OrLogicFunc>($3, $5); }
-            | KW_NOT OP_LPAREN boolean OP_RPAREN  { $$ = Node::add<ast::NotLogicFunc>($3); }
+expression:   KW_AND OP_LPAREN expressions OP_COMMA expressions OP_RPAREN  { $$ = Node::add<ast::AndLogicFunc>($3, $5); }
+            | KW_OR OP_LPAREN expressions OP_COMMA expressions OP_RPAREN  { $$ = Node::add<ast::OrLogicFunc>($3, $5); }
+            | KW_NOT OP_LPAREN expressions OP_RPAREN  { $$ = Node::add<ast::NotLogicFunc>($3); }
             | expressions {$$ = $1;}
             ;
 
 
 expressions:   expressions OP_ASSIGN expressions { $$ = Node::add<ast::OpAssign>($1, $3); }
+            | expressions OP_ASSIGN call-stmt { $$ = Node::add<ast::OpAssign>($1, $3); }
             | expressions OP_PLUS expressions { $$ = Node::add<ast::OpAdd>($1, $3); }
             | expressions OP_MINUS expressions { $$ = Node::add<ast::OpSub>($1, $3); }
             | expressions OP_MULT expressions { $$ = Node::add<ast::OpMult>($1, $3); }
