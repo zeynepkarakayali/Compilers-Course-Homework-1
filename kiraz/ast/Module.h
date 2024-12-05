@@ -10,7 +10,7 @@ namespace ast {
 
     class Module : public Node {
     public:
-        Module(Node::Cptr statements) : Node(), m_statements(statements) {}
+        Module(Node::Cptr statements) : Node(), m_statements(statements){}
 
         std::string as_string() const override { return fmt::format("Module([{}])", m_statements->as_string());}
 
@@ -18,30 +18,7 @@ namespace ast {
             return m_statements;
         }
 
-        Node::Ptr add_entry_to_the_symtab(Node::Ptr statments){
-            assert(statments);
-            
-            //if(auto ret = Node::compute_stmt_type(*m_symtab)){ return ret;}  
 
-            for(const auto &stmt : static_cast<const NodeList &>(*statments).get_nodes()){
-                fmt::print("\n{}\n", stmt->as_string());
-
-                if(auto ret = stmt->add_to_symtab_forward(*m_symtab)){
-                    return ret;
-                }
-            }
-
-            for(const auto &stmt : static_cast<const NodeList &>(*m_statements).get_nodes()){
-
-                if(auto ret = stmt->add_to_symtab_ordered(*m_symtab)){
-                    return ret;
-                }
-
-            }
-                        m_symtab->print_symbols();
-                        return nullptr;
-
-        }
 
         Node::Ptr compute_stmt_type(SymbolTable &st) override {
             assert(m_statements);
@@ -57,13 +34,12 @@ namespace ast {
 
 
             for(const auto &stmt : static_cast<const NodeList &>(*m_statements).get_nodes()){
-                fmt::print("\n{}\n", stmt->as_string());
+                //fmt::print("\n{}\n", stmt->as_string());
 
                 if(auto ret = stmt->add_to_symtab_forward(st)){
                     return ret;
                 }
-                            fmt::print("\n\nGENEL SCOPE\n\n");
-                            st.print_symbols();
+
 
                 if(auto ret = stmt->add_to_symtab_forward(*m_symtab)){
                     return ret;
@@ -81,16 +57,19 @@ namespace ast {
                 if(auto ret = stmt->add_to_symtab_ordered(*m_symtab)){
                     return ret;
                 }
-                            fmt::print("\n\nGENEL SCOPE\n\n");
-                            st.print_symbols();
+                fmt::print("\n{}\n", stmt->as_string());
+
 
                 if(const auto ret = stmt->compute_stmt_type(st)){
                     return ret;
                 }
 
+                m_symtab->print_symbols();
+
 
             }
 
+            //st.print_symbols();
 
             //m_symtab->print_symbols();
 
@@ -98,7 +77,7 @@ namespace ast {
             return nullptr;
         }
 
-    SymTabEntry get_subsymbol(Node::Ptr node) const override {
+    SymTabEntry get_subsymbol(Ptr node) const override {
         assert(node);
         std::string symbol_name = node->as_string();
 
