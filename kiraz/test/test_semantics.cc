@@ -203,7 +203,7 @@ TEST_F(CompilerFixture, class_method_conflict) {
 }
 
 TEST_F(CompilerFixture, class_member_conflict) {
-    verify_error("class A { let A: Integer64; };", "Identifier 'A' is already in symtab"); // BAKK
+    verify_error("class A { let A: Integer64; };", "Identifier 'A' is already in symtab");
 }
 
 TEST_F(CompilerFixture, class_name_conflict) {
@@ -282,11 +282,11 @@ TEST_F(CompilerFixture, func_return_mismatch) {
 }
 
 TEST_F(CompilerFixture, return_misplaced_module) {
-    verify_error(R"(return a;)", "Misplaced return statement"); //BAKKK
+    verify_error(R"(return a;)", "Misplaced return statement");
 }
 
 TEST_F(CompilerFixture, return_misplaced_class) {
-    verify_error(R"(class A{return a;};)", "Misplaced return statement"); //BAKK
+    verify_error(R"(class A{return a;};)"); //bu hatayi parser'da yakalıyoruz
 }
 
 TEST_F(CompilerFixture, while_simple) {
