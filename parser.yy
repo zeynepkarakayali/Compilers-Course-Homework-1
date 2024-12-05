@@ -11,6 +11,8 @@
 #include <kiraz/NodeList.h>
 
 #include <kiraz/token/Literal.h>
+#include <kiraz/token/Keyword.h>
+
 
 int yyerror(const char *msg);
 extern std::shared_ptr<Token> curtoken;
@@ -18,6 +20,20 @@ extern int yylineno;
 %}
 
 %token    REJECTED
+
+%token    KW_IMPORT
+%token    KW_FUNC
+%token    KW_LET
+%token    KW_IF
+%token    KW_ELSE
+%token    KW_WHILE
+%token    KW_CLASS
+%token    KW_RETURN
+%token    KW_TRUE
+%token    KW_FALSE
+%token    KW_AND
+%token    KW_OR
+%token    KW_NOT
 
 %token    OP_PLUS
 %token    OP_MINUS
@@ -40,19 +56,7 @@ extern int yylineno;
 
 %token    L_INTEGER
 
-%token    KW_IMPORT
-%token    KW_FUNC
-%token    KW_LET
-%token    KW_IF
-%token    KW_ELSE
-%token    KW_WHILE
-%token    KW_CLASS
-%token    KW_RETURN
-%token    KW_TRUE
-%token    KW_FALSE
-%token    KW_AND
-%token    KW_OR
-%token    KW_NOT
+
 
 
 %token    STRING_LITERAL
@@ -230,7 +234,7 @@ compound-stmt:    OP_LBRACE general_scope_statements OP_RBRACE {
                 | OP_LBRACE OP_RBRACE { $$ = Node::add<ast::CompoundStatement>(); }
              ;
 call-stmt:  member_expression OP_LPAREN call_arguments OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, $3);}
-            | member_expression OP_LPAREN OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, nullptr);};
+            | member_expression OP_LPAREN OP_RPAREN {$$ = Node::add<ast::CallStatement>($1, nullptr); };
             ;
 
 
@@ -247,32 +251,31 @@ call_arguments:   call_arguments OP_COMMA expression {
                 ;
 
 
-expression:   KW_AND OP_LPAREN boolean OP_COMMA boolean OP_RPAREN  { $$ = Node::add<ast::AndLogicFunc>($3, $5); }
-            | KW_OR OP_LPAREN boolean OP_COMMA boolean OP_RPAREN  { $$ = Node::add<ast::OrLogicFunc>($3, $5); }
-            | KW_NOT OP_LPAREN boolean OP_RPAREN  { $$ = Node::add<ast::NotLogicFunc>($3); }
+expression:   KW_AND OP_LPAREN expressions OP_COMMA expressions OP_RPAREN  { $$ = Node::add<ast::AndLogicFunc>($3, $5); }
+            | KW_OR OP_LPAREN expressions OP_COMMA expressions OP_RPAREN  { $$ = Node::add<ast::OrLogicFunc>($3, $5); }
+            | KW_NOT OP_LPAREN expressions OP_RPAREN  { $$ = Node::add<ast::NotLogicFunc>($3); }
             | expressions {$$ = $1;}
             ;
 
-
-expressions:  keyword OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
-            | iden OP_ASSIGN expression { $$ = Node::add<ast::OpAssign>($1, $3); }
-            | expression OP_PLUS expression { $$ = Node::add<ast::OpAdd>($1, $3); }
-            | expression OP_MINUS expression { $$ = Node::add<ast::OpSub>($1, $3); }
-            | expression OP_MULT expression { $$ = Node::add<ast::OpMult>($1, $3); }
-            | expression OP_DIVF expression { $$ = Node::add<ast::OpDivF>($1, $3); }
-            | expression OP_LE expression { $$ = Node::add<ast::OpLe>($1, $3); }
-            | expression OP_GE expression { $$ = Node::add<ast::OpGe>($1, $3); }
-            | expression OP_EQUALS expression { $$ = Node::add<ast::OpEquals>($1, $3); }
-            | expression OP_SMALLER expression { $$ = Node::add<ast::OpSmaller>($1, $3); }
-            | expression OP_BIGGER expression { $$ = Node::add<ast::OpBigger>($1, $3); }
-            | OP_LPAREN expression OP_RPAREN { $$ = $2; }
-            | OP_MINUS OP_LPAREN expression OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_MINUS, $3); }
-            | OP_PLUS OP_LPAREN expression OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_PLUS, $3); }
+expressions:   expressions OP_ASSIGN expressions { $$ = Node::add<ast::OpAssign>($1, $3); }
+            | expressions OP_ASSIGN call-stmt { $$ = Node::add<ast::OpAssign>($1, $3); }
+            | expressions OP_PLUS expressions { $$ = Node::add<ast::OpAdd>($1, $3); }
+            | expressions OP_MINUS expressions { $$ = Node::add<ast::OpSub>($1, $3); }
+            | expressions OP_MULT expressions { $$ = Node::add<ast::OpMult>($1, $3); }
+            | expressions OP_DIVF expressions { $$ = Node::add<ast::OpDivF>($1, $3); }
+            | expressions OP_LE expressions { $$ = Node::add<ast::OpLe>($1, $3); }
+            | expressions OP_GE expressions { $$ = Node::add<ast::OpGe>($1, $3); }
+            | expressions OP_EQUALS expressions { $$ = Node::add<ast::OpEquals>($1, $3); }
+            | expressions OP_SMALLER expressions { $$ = Node::add<ast::OpSmaller>($1, $3); }
+            | expressions OP_BIGGER expressions { $$ = Node::add<ast::OpBigger>($1, $3); }
+            | OP_LPAREN expressions OP_RPAREN { $$ = $2; }
+            | OP_MINUS OP_LPAREN expressions OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_MINUS, $3); }
+            | OP_PLUS OP_LPAREN expressions OP_RPAREN  { $$ = Node::add<ast::SignedNode>(OP_PLUS, $3); }
             | signed_int {$$ = $1;}
             | integer {$$ = $1;}
             | iden {$$ = $1;}
             | boolean {$$ = $1;}
-            | keyword
+            | keyword {$$ = $1;}
             | STRING_LITERAL { $$ = Node::add<ast::StringLiteral>(curtoken); }
             | member_expression {$$ = $1;}
             ;
@@ -285,9 +288,9 @@ member_expression: iden OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); }
 
 type-annot: OP_COLON iden  {$$ = $2;};
 
-keyword:     KW_AND { $$ = Node::add<ast::Keyword>(curtoken);}
-          |  KW_OR { $$ = Node::add<ast::Keyword>(curtoken);}
-          |  KW_NOT { $$ = Node::add<ast::Keyword>(curtoken);}
+keyword:     KW_AND { $$ = Node::add<ast::KwAnd>(); std::dynamic_pointer_cast<ast::KwAnd>($$)->initialize_stmt_type();}
+          |  KW_OR { $$ = Node::add<ast::KwOr>(); std::dynamic_pointer_cast<ast::KwOr>($$)->initialize_stmt_type();}
+          |  KW_NOT { $$ = Node::add<ast::KwNot>(); std::dynamic_pointer_cast<ast::KwNot>($$)->initialize_stmt_type();}
           ;
 
 iden:    IDENTIFIER { $$ = Node::add<ast::Identifier>(curtoken); std::dynamic_pointer_cast<ast::Identifier>($$)->initialize_stmt_type();}

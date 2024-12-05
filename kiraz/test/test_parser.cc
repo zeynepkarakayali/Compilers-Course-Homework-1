@@ -483,7 +483,4 @@ TEST_F(ParserFixture, return_bad_operand) {
 
 TEST_F(ParserFixture, bonus) {
     verify_no_root("1---2;");
-
 }
-
-

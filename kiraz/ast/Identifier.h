@@ -20,13 +20,23 @@ class Identifier : public Node {
         }
 
 
-    virtual SymTabEntry get_symbol (const SymbolTable &st) const override {
+    virtual Node::SymTabEntry get_symbol (const SymbolTable &st) const override {
         auto name = as_string();
+        fmt::print("Name: {}\n", name);
         name = name.substr(3, name.size() - 4);
-        auto entry = st.get_cur_symtab()->get_symbol(name);
-
-        return entry;
+        return st.get_cur_symtab()->get_symbol(name);
     }
+
+    Node::Ptr compute_stmt_type(SymbolTable &st)  override {
+        if(auto ret = Node::compute_stmt_type(st)){ return ret;}
+        Node::Ptr iden = std::make_shared<ast::Identifier>(m_id);
+        auto entry_m_id = iden->get_symbol(st);
+        fmt::print("entry left: {}\n", entry_m_id.name);
+        if(!entry_m_id.stmt) return set_error(FF("Identifier '{}' is not found", iden->as_string().substr(3, iden->as_string().size() - 4)));
+        return nullptr;
+
+    }
+
 
     private:
         Token::Ptr m_id;

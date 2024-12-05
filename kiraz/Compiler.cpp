@@ -121,6 +121,7 @@ ast::FuncStatement::Ptr  add_function_type2(std::string name, std::string return
 }
 
 
+
 int Compiler::compile(Node::Ptr root, std::ostream &ostr) {
     if (! root) {
         return 1;
@@ -170,8 +171,7 @@ int Compiler::compile(Node::Ptr root, std::ostream &ostr) {
         return 2;
     }
     */
-    
-    
+
 
     return 0;
 }
@@ -183,6 +183,8 @@ SymbolTable::SymbolTable()
     {
         if (! s_module_io) { s_module_io = Compiler::current()->compile_module(FILE_io_ki); }
     }
+
+
 
 SymbolTable::SymbolTable(ScopeType scope_type) : SymbolTable() {
     m_symbols.back()->scope_type = scope_type;
