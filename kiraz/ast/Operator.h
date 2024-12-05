@@ -581,14 +581,20 @@ class OpDot : public OpBinary {
             }
 
             else if(m_left->get_symbol(st).stmt){
+
                 fmt::print("m_right {}, m_left \n",  m_left->get_symbol(st).stmt->as_string());
                 auto m_left_symbol = m_left->get_symbol(st).stmt->get_symbol(st);
                     if(m_left_symbol.stmt){
                         auto m_right_stmt = m_left_symbol.stmt->get_subsymbol(m_right);
+
+                        fmt::print("m_rigt_stmt subsymbol: {}\n",m_right_stmt.name );
+
                         if(!(m_right_stmt.stmt)){
+
                             return set_error(FF("Identifier '{}' is not found", error_left + "." + error_right));
 
                         }
+
                     }
                 
             }
