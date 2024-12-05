@@ -1,6 +1,7 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
+
 #include <cassert>
 #include <map>
 
@@ -22,7 +23,7 @@ enum class ScopeType {
 struct Scope {
     using SymTab = std::map<std::string, Node::Ptr>;
 
-    Scope(const std::map<std::string, Node::Ptr> &map, ScopeType stype, Node::Ptr s )
+    Scope(const std::map<std::string, Node::Ptr> &map, ScopeType stype, Node::Ptr s)
             : symbols(map), scope_type(stype), stmt(s) {}
 
     SymTab symbols;
@@ -106,6 +107,7 @@ public:
         }
 }
 
+
     auto get_cur_symtab() { return m_symbols.back(); }
     auto get_cur_symtab() const { return m_symbols.back(); }
     auto get_scope_type() const { return m_symbols.back()->scope_type; }
@@ -147,6 +149,5 @@ private:
     static Compiler *s_current;
 };
 
-
-
 #endif // COMPILER_H
+

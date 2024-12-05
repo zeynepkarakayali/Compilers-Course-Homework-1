@@ -217,6 +217,7 @@ TEST_F(CompilerFixture, class_scoped_func_conflict) {
     verify_error("class A { let a = 5; func f() : Void { let a = 5; }; };",
             "Identifier 'a' is already in symtab");
 }
+
 TEST_F(CompilerFixture, class_use_before_definition) {
     verify_ok("let a : A; class A { };");
 }
