@@ -8,6 +8,8 @@
 #include <kiraz/Node.h>
 #include <kiraz/ast/Identifier.h>
 #include <kiraz/token/Identifier.h>
+#include <kiraz/ast/Literal.h>
+#include <set>
 
 
 namespace ast {
@@ -209,6 +211,7 @@ class OpSmaller : public OpBinary {
 
 class OpBigger : public OpBinary {
 public:
+
     OpBigger(const Node::Ptr &left, const Node::Ptr &right) : OpBinary(OP_BIGGER, left, right) , m_left(left), m_right(right) {}
 
         Node::Ptr compute_stmt_type(SymbolTable &st)  override {
@@ -610,5 +613,4 @@ class OpDot : public OpBinary {
 
 }
 #endif // KIRAZ_AST_OPERATOR_H
-
 

@@ -117,13 +117,15 @@ general_scope_statement:    while_stmt { $$ = $1; }
                           | if-stmt { $$ = $1; } 
                           | return-exp { $$ = $1; } 
                           | call-stmt { $$ = $1;}
+                          ;
 
 
 import-stmt: KW_IMPORT iden { $$ = Node::add<ast::ImportStatement>($2); };
 
 
 
-class-declaration:  KW_CLASS iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $3, nullptr); }
+
+class-declaration: KW_CLASS iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $3, nullptr); }
                  | KW_CLASS iden OP_COLON iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $5, $4); }
                  ;
 
@@ -202,7 +204,7 @@ func-statements: func-statements func-statement OP_SCOLON {
                                                             }
                 ;
 
-func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} | call-stmt{$$=$1;};
+func-statement: if-stmt {$$=$1;} | while_stmt {$$=$1;} | let_stmt {$$=$1;} | fun-declaration {$$=$1;}  | expression {$$=$1;} | return-exp {$$=$1;} | call-stmt{$$=$1;} ;
 
 return-exp:   KW_RETURN expression {$$ = Node::add<ast::ReturnStatement>($2);};
             | KW_RETURN call-stmt {$$ = Node::add<ast::ReturnStatement>($2);};
@@ -257,7 +259,6 @@ expression:   KW_AND OP_LPAREN expressions OP_COMMA expressions OP_RPAREN  { $$ 
             | expressions {$$ = $1;}
             ;
 
-
 expressions:   expressions OP_ASSIGN expressions { $$ = Node::add<ast::OpAssign>($1, $3); }
             | expressions OP_ASSIGN call-stmt { $$ = Node::add<ast::OpAssign>($1, $3); }
             | expressions OP_PLUS expressions { $$ = Node::add<ast::OpAdd>($1, $3); }
@@ -282,8 +283,8 @@ expressions:   expressions OP_ASSIGN expressions { $$ = Node::add<ast::OpAssign>
 
 
 
-member_expression: member_expression OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); }
-                 | iden { $$ = $1; }
+member_expression: iden OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); }
+                 | member_expression OP_DOT iden { $$ = Node::add<ast::OpDot>($1, $3); };
                  ;
 
 type-annot: OP_COLON iden  {$$ = $2;};
@@ -323,4 +324,5 @@ int yyerror(const char *s) {
     Node::reset_root();
 
     return 1;
+
 }

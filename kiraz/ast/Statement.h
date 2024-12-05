@@ -6,6 +6,7 @@
 #include <kiraz/NodeList.h>
 #include <kiraz/ast/Operator.h>
 #include <kiraz/ast/List.h>
+#include <kiraz/ast/Literal.h>
 #include <kiraz/ast/Module.h>
 
 
@@ -65,7 +66,9 @@ class FuncStatement : public Node{
                                                                                m_type->as_string(),  m_scope->as_string()); }
         }
 
-
+        Node::Cptr get_iden() const {
+            return m_iden;
+        }
 
 
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override {
@@ -198,6 +201,7 @@ class ClassStatement : public Node{
             return nullptr;
         }
 
+
         Node::Ptr compute_stmt_type(SymbolTable &st) override {
 
             if(auto ret = Node::compute_stmt_type(st)){ return ret; }
@@ -226,6 +230,7 @@ class ClassStatement : public Node{
                         return ret;
                     }
                     if(auto ret = stmt->add_to_symtab_forward(*m_symtab)){
+
                         return ret;
                     }
             }
@@ -258,6 +263,7 @@ class ClassStatement : public Node{
 
         SymTabEntry get_subsymbol(Ptr stmt) const override {
             return m_symtab->get_symbol(stmt->as_string().substr(3, stmt->as_string().size() - 4));
+
         }
         
 
@@ -266,6 +272,7 @@ class ClassStatement : public Node{
        Node::Ptr m_scope;
        Node::Ptr m_parent_class; // parent class icin
        std::unique_ptr<SymbolTable> m_symtab;
+
        std::vector<SymTabEntry> m_symbols;
 };
 
@@ -339,11 +346,12 @@ class LetStatement : public Node{
 
             Node::Cptr type = nullptr;
 
-
+            // tip varsa ve stmt yoksa, tipe gore identifierin tipi belirlenir
             if(m_type && !m_stmt){ 
                 type = std::dynamic_pointer_cast<const Node>(m_type);
             }
 
+            // stmt varsa ve tip yoksa, stmt ile identifierin tipi belirlenir
             if(m_stmt && !m_type){ 
                 auto stmt_type =  m_stmt->get_stmt_type();
                 if(stmt_type) {
@@ -352,7 +360,8 @@ class LetStatement : public Node{
                 }
                 
             }
-            
+
+            // ikisi de varsa, tip ve stmt nin tipi karsilastirilir
             if(m_stmt && m_type){
                 fmt::print("m_stmt_type: {}, m_type: {}", m_stmt->get_stmt_type()->as_string() , m_type->as_string());
 
@@ -422,6 +431,20 @@ class WhileStatement : public Node{
             if(m_exp->get_stmt_type()->as_string() != "Id(Boolean)"){
                 return set_error(FF("While only accepts tests of type 'Boolean'"));
             }
+  
+            if(m_scope){
+                for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+                    fmt::print("\n{}\n", stmt->as_string());
+                    if(const auto ret = stmt->compute_stmt_type(st)){
+                        return ret;
+                    }
+                    if(auto ret = stmt->add_to_symtab_ordered(st)){
+                        return ret;
+                    }
+
+                }
+
+            }
 
             return nullptr;
         }
@@ -462,7 +485,22 @@ public:
         fmt::print("if expression type: {}\n", m_exp->get_stmt_type()->as_string());
         if(m_exp->get_stmt_type()->as_string() != "Id(Boolean)"){
             return set_error(FF("If only accepts tests of type 'Boolean'"));
-        }        return nullptr;
+        }        
+        
+        if(m_scope){
+            for(const auto &stmt : dynamic_cast<const CompoundStatement&>(*m_scope).get_statements()){
+                fmt::print("\n{}\n", stmt->as_string());
+                if(const auto ret = stmt->compute_stmt_type(st)){
+                    return ret;
+                }
+                if(auto ret = stmt->add_to_symtab_ordered(st)){
+                    return ret;
+                }
+
+            }
+
+        }
+        return nullptr;
      }
 
 private:

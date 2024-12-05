@@ -64,11 +64,19 @@ extern std::shared_ptr<Token> curtoken;
 
 [ \n\t]+ {colno+= yyleng;}
 
+"import" {colno += yyleng; curtoken = Token::New<KwImport> (); return KW_IMPORT;}
+"func" {colno += yyleng; curtoken = Token::New<KwFunc> (); return KW_FUNC;}
+"if" {colno += yyleng; curtoken = Token::New<KwIf> (); return KW_IF;}
+"else" {colno += yyleng; curtoken = Token::New<KwElse> (); return KW_ELSE;}
+"while" {colno += yyleng; curtoken = Token::New<KwWhile> (); return KW_WHILE;}
+"let" {colno += yyleng; curtoken = Token::New<KwLet> (); return KW_LET;}
+"class" {colno += yyleng; curtoken = Token::New<KwClass> (); return KW_CLASS;}
+"return" {colno += yyleng; curtoken = Token::New<KwClass> (); return KW_RETURN;}
+"true" {colno += yyleng; curtoken = Token::New<KwTrue> (); return KW_TRUE;}
+"false" {colno += yyleng; curtoken = Token::New<KwFalse> (); return KW_FALSE;}
 
-
-
-
-[a-zA-Z][a-zA-Z0-9_]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
+[a-zA-Z][a-zA-Z0-9]* {colno += yyleng; curtoken = Token::New<Identifier> (yytext); return IDENTIFIER; }
 
 
 .    {colno += yyleng; curtoken = Token::New<Rejected> ("Rejected"); return YYUNDEF; }
+
