@@ -1,3 +1,6 @@
+#ifndef COMPILER_H
+#define COMPILER_H
+
 
 #include <cassert>
 #include <map>
@@ -5,6 +8,9 @@
 #include "Node.h"
 #include "Token.h"
 #include <lexer.hpp>
+#include <iostream>
+
+
 
 enum class ScopeType {
     Module,
@@ -12,6 +18,7 @@ enum class ScopeType {
     Func,
     Method,
 };
+
 
 struct Scope {
     using SymTab = std::map<std::string, Node::Ptr>;
@@ -77,6 +84,30 @@ public:
         return ScopeRef(*this);
     }
 
+    void print_symbols() const {
+        fmt::print("Symbol Table Contents:\n");
+        for (size_t i = 0; i < m_symbols.size(); ++i) {
+            const auto& scope = m_symbols[i];
+            std::string sct;
+            switch (static_cast<int>(scope->scope_type)) {
+                case 0: sct = "Module"; break;
+                case 1: sct = "Class"; break;
+                case 2: sct =  "Func"; break;
+                case 3: sct =  "Method"; break;
+                default: sct =  "Unknown"; break;
+            }
+            fmt::print("Scope {} (Type: {}):\n", i, sct);
+            for (const auto& [name, node] : scope->symbols) {
+                fmt::print("  Name: {:<15}", name);
+                if (node) {
+                    fmt::print("    Type: {}", node->as_string());
+                }
+                fmt::print("\n");
+            }
+        }
+}
+
+
     auto get_cur_symtab() { return m_symbols.back(); }
     auto get_cur_symtab() const { return m_symbols.back(); }
     auto get_scope_type() const { return m_symbols.back()->scope_type; }
@@ -117,3 +148,6 @@ private:
     std::string m_error;
     static Compiler *s_current;
 };
+
+#endif // COMPILER_H
+

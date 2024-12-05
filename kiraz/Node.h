@@ -110,12 +110,14 @@ public:
      */
     virtual SymTabEntry get_symbol(const SymbolTable &) const { return {}; }
 
+
     /**
      * @brief get_symbol: Get the statement referred by the current statement in own symtab.
      *                    Used during code generation phase.
      * @return The statement pointer if found in the given symtab, otherwise nullptr
      */
     virtual SymTabEntry get_symbol() const { return {}; }
+
 
     /**
      * @brief get_subsymbol: Get the statement referred by the current statement in the symtab of
@@ -124,6 +126,7 @@ public:
      * @return The statement pointer if found in the given symtab, otherwise nullptr
      */
     virtual SymTabEntry get_subsymbol(Ptr) const { return {}; }
+
 
     /*
      * Static interface

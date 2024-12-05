@@ -16,6 +16,9 @@ Integer::Integer(Token::Ptr t) : Node(){
     catch (std::out_of_range &e){
         // TODO mark this node as invalid
     }
+
+    Integer::set_stmt_type(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("Integer64")));
+
 } 
 
 }

@@ -2,6 +2,11 @@
 #define KIRAZ_AST_LITERAL_H
 
 #include <kiraz/Node.h>
+#include <kiraz/ast/Identifier.h>
+#include <kiraz/token/Identifier.h>
+#include <kiraz/token/Keyword.h>
+
+
 
 namespace ast {
 class Integer : public Node {
@@ -9,6 +14,9 @@ public:
     Integer(Token::Ptr);
 
     std::string as_string() const override {return fmt::format("Int({})", m_value); }
+    virtual Node::SymTabEntry get_symbol (const SymbolTable &st) const override {
+        return st.get_cur_symtab()->get_symbol("Integer64");
+    }
 
 private:
     int64_t m_value;
@@ -32,7 +40,10 @@ private:
 
 class StringLiteral : public Node {
 public:
-    StringLiteral(Token::Ptr str) : Node(), m_str(str) {}
+    StringLiteral(Token::Ptr str) : Node(), m_str(str) {
+        StringLiteral::set_stmt_type(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("String")));
+
+    }
 
     std::string as_string() const override {
         std::string value = m_str->as_string();
@@ -45,6 +56,9 @@ public:
         
         return fmt::format("Str({})", value);
     }
+    virtual Node::SymTabEntry get_symbol (const SymbolTable &st) const override {
+        return st.get_cur_symtab()->get_symbol("String");
+    }
 
 private:
     Token::Ptr m_str; 
@@ -52,7 +66,9 @@ private:
 
 class Boolean : public Node {
 public:
-    Boolean(Token::Ptr bl) : Node(), m_bool(bl) {}
+    Boolean(Token::Ptr bl) : Node(), m_bool(bl) {
+        Boolean::set_stmt_type(std::make_shared<ast::Identifier>(Token::New<token::Identifier>("Boolean")));
+    }
 
     std::string as_string() const override {
         
@@ -61,6 +77,37 @@ public:
 
 private:
     Token::Ptr m_bool; 
+};
+
+class KwAnd : public Node {
+public:
+    KwAnd() : Node() {}
+
+    std::string as_string() const override { return fmt::format("and");}
+    
+    void initialize_stmt_type() { set_stmt_type(shared_from_this());}
+
+};
+
+class KwOr : public Node {
+public:
+    KwOr() : Node() {}
+
+    std::string as_string() const override { return fmt::format("or");}
+    
+    void initialize_stmt_type() { set_stmt_type(shared_from_this());}
+
+};
+
+class KwNot : public Node {
+public:
+    KwNot() : Node() {}
+
+    std::string as_string() const override { return fmt::format("not");}
+    
+    void initialize_stmt_type() { set_stmt_type(shared_from_this());}
+
+
 };
 
 }

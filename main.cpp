@@ -4,7 +4,8 @@
 #include "lexer.hpp"
 #include "main.h"
 #include "parser.hpp"
-
+//#include <string_view>
+#include <kiraz/Compiler.h>
 #include <kiraz/Node.h>
 
 extern int yydebug;
@@ -29,6 +30,15 @@ static int test(std::string_view str) {
     if (Node::current_root()) {
         fmt::print("{}\n", Node::current_root()->as_string());
     }
+
+        Compiler compiler;
+
+        std::stringstream ostr;
+
+        /* perform */
+        std::string strr(str.begin(), str.end());
+        compiler.compile_string(strr, ostr);
+
 
     return ret;
 }
