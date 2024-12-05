@@ -151,7 +151,7 @@ class FuncStatement : public Node{
 
 class ClassStatement : public Node{
     public:
-        ClassStatement(Node::Cptr iden, Node::Cptr scope, Node::Cptr parent_class = nullptr) : Node(), m_iden(iden), m_scope(scope), m_parent_class(parent_class) {    
+        ClassStatement(Node::Ptr iden, Node::Ptr scope, Node::Ptr parent_class = nullptr) : Node(), m_iden(iden), m_scope(scope), m_parent_class(parent_class) {    
             if (!iden ) {
                 throw std::runtime_error("ClassStatement constructor received a nullptr iden");
             }
@@ -177,10 +177,18 @@ class ClassStatement : public Node{
             return entry;
         }
 
-
         virtual Node::Ptr add_to_symtab_forward(SymbolTable &st) override{
             if(std::dynamic_pointer_cast<const ast::Identifier>(m_iden)->get_symbol(st)){
                 return set_error(FF("Identifier '{}' is already in symtab", m_iden->as_string().substr(3, m_iden->as_string().size() - 4)));
+            }
+
+            if(m_parent_class){
+                fmt::print("helloo");
+                // parent class symtab'da var mi
+                if(!get_subsymbol(m_iden)){
+                    fmt::print("merhabaaaa");
+                    return set_error(fmt::format("Type '{}' is not found", m_parent_class->as_string().substr(3, m_parent_class->as_string().size() - 4)));
+                }
             }
             st.add_symbol(m_iden->as_string().substr(3, m_iden->as_string().size() - 4), shared_from_this());
             return nullptr;
@@ -188,6 +196,7 @@ class ClassStatement : public Node{
 
         Node::Ptr compute_stmt_type(SymbolTable &st) override {
 
+            fmt::print("heyyy\n");
             if(auto ret = Node::compute_stmt_type(st)){ return ret; }
 
             // modul seviyesinde degilse
@@ -221,7 +230,7 @@ class ClassStatement : public Node{
 
                     // ilk basta bu kontrol yapilsaydi -> class_member_conflict icin uppercase letterda hata veriyordu
                     if(const auto ret = stmt->compute_stmt_type(st)){
-                        fmt::print("hellooooo");
+                        fmt::print("aaaaa");
                         return ret;
                     }
 
@@ -245,9 +254,9 @@ class ClassStatement : public Node{
         
 
     private:
-       Node::Cptr m_iden;
-       Node::Cptr m_scope;
-       Node::Cptr m_parent_class; // parent class icin
+       Node::Ptr m_iden;
+       Node::Ptr m_scope;
+       Node::Ptr m_parent_class; // parent class icin
        std::shared_ptr<SymbolTable> m_symtab;
        std::vector<SymTabEntry> m_symbols;
 };
