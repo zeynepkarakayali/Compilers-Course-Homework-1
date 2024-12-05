@@ -57,29 +57,7 @@ extern int yylineno;
 %token    L_INTEGER
 
 
-%token    KW_IMPORT
-%token    KW_FUNC
-%token    KW_LET
-%token    KW_IF
-%token    KW_ELSE
-%token    KW_WHILE
-%token    KW_CLASS
-%token    KW_RETURN
-%token    KW_TRUE
-%token    KW_FALSE
 
-
-%token    STRING_LITERAL
-%token    IDENTIFIER
-
-%left      OP_SCOLON
-%right     OP_ASSIGN
-%left      OP_EQUALS
-%left      OP_SMALLER OP_BIGGER
-%left      OP_LE OP_GE
-%left      OP_PLUS OP_MINUS
-%left      OP_MULT OP_DIVF
-%left      OP_DOT
 
 %token    STRING_LITERAL
 %token    IDENTIFIER
@@ -344,4 +322,3 @@ int yyerror(const char *s) {
 
     return 1;
 }
-
