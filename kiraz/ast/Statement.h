@@ -151,7 +151,7 @@ class FuncStatement : public Node{
 
 class ClassStatement : public Node{
     public:
-        ClassStatement(Node::Cptr iden, Node::Cptr scope) : Node(), m_iden(iden), m_scope(scope) {    
+        ClassStatement(Node::Cptr iden, Node::Cptr scope, Node::Cptr parent_class = nullptr) : Node(), m_iden(iden), m_scope(scope), m_parent_class(parent_class) {    
             if (!iden ) {
                 throw std::runtime_error("ClassStatement constructor received a nullptr iden");
             }
@@ -159,16 +159,8 @@ class ClassStatement : public Node{
                 throw std::runtime_error("ClassStatement constructor received a nullptr scope");
             }
         }
-        /*
-        ClassStatement(Node::Cptr iden, Node::Cptr scope, Node::Cptr parent_class = nullptr) : Node(), m_iden(iden), m_scope(scope), m_parent_class(parent_class) {    
-            if (!iden ) {
-                throw std::runtime_error("FuncStatement constructor received a nullptr iden");
-            }
-            if(!scope){
-                throw std::runtime_error("FuncStatement constructor received a nullptr scope");
-            }
-        }
-        */
+        
+        
         
         std::string as_string() const override  {return fmt::format("Class(n={}, s={})", m_iden->as_string(),  m_scope->as_string()); }
 

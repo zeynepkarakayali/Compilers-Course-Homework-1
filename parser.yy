@@ -120,7 +120,8 @@ import-stmt: KW_IMPORT iden { $$ = Node::add<ast::ImportStatement>($2); };
 
 
 
-class-declaration: KW_CLASS iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $3); }
+class-declaration: KW_CLASS iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $3, nullptr); }
+                 | KW_CLASS iden OP_COLON iden class-scope {$$ = Node::add<ast::ClassStatement>($2, $5, $4); }
                  ;
 
 class-scope : OP_LBRACE class-statements OP_RBRACE { 
