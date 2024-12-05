@@ -559,6 +559,7 @@ class OpDot : public OpBinary {
         Node::Ptr compute_stmt_type(SymbolTable &st)  override {
 
             if(auto ret = Node::compute_stmt_type(st)){ return ret; }
+
             fmt::print("left_stmt_type: {}, right_stmt_type: {}", m_left->get_stmt_type()->as_string(), m_right->get_stmt_type()->as_string());
             if(m_left->get_stmt_type()->as_string() != m_left->as_string() ){
                 if(const auto ret = m_left->compute_stmt_type(st)){
@@ -583,12 +584,18 @@ class OpDot : public OpBinary {
             }
 
             else if(m_left->get_symbol(st).stmt){
-                if(!(m_right->get_symbol(st).stmt)){
-                                fmt::print("afsdfa\n");
+                fmt::print("m_right {}, m_left \n",  m_left->get_symbol(st).stmt->as_string());
+                auto m_left_symbol = m_left->get_symbol(st).stmt->get_symbol(st);
+                    if(m_left_symbol.stmt){
+                        auto m_right_stmt = m_left_symbol.stmt->get_subsymbol(m_right);
+                        if(!(m_right_stmt.stmt)){
+                            return set_error(FF("Identifier '{}' is not found", error_left + "." + error_right));
 
-                return set_error(FF("Identifier '{}' is not found", error_left + "." + error_right));
+                        }
+                    }
+                
             }
-            }
+            
             return nullptr;
         }
 
